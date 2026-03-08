@@ -1,1299 +1,1308 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>지호의 동화책 메이커</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      min-height: 100vh;
-      background: linear-gradient(135deg, #FFF9F0 0%, #FFF0F5 50%, #F0F5FF 100%);
-      font-family: 'Nunito', 'Apple SD Gothic Neo', sans-serif;
-      position: relative;
-      overflow-x: hidden;
-    }
-    textarea:focus, input:focus { outline: none; }
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-thumb { background: #FFB3C6; border-radius: 3px; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>동화책 메이커</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Nunito', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); min-height: 100vh; }
 
-    @keyframes bounce {
-      0%, 80%, 100% { transform: translateY(0); }
-      40% { transform: translateY(-12px); }
-    }
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 0.6; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.05); }
-    }
+#app { max-width: 560px; margin: 0 auto; padding: 12px 12px 80px; }
 
-    #bg-stars {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-      z-index: 0;
-    }
+/* Header */
+.header { text-align: center; padding: 20px 0 16px; position: relative; }
+.header-title { font-size: 26px; font-weight: 800; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.header-subtitle { font-size: 13px; color: rgba(255,255,255,0.85); margin-top: 4px; }
+.header-btns { position: absolute; top: 20px; right: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.header-left-btns { position: absolute; top: 20px; left: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.icon-btn { background: rgba(255,255,255,0.25); border: none; border-radius: 12px; padding: 8px 10px; cursor: pointer; font-size: 20px; color: #fff; backdrop-filter: blur(8px); transition: all 0.2s; display: flex; flex-direction: column; align-items: center; }
+.icon-btn:hover { background: rgba(255,255,255,0.4); transform: scale(1.05); }
+.icon-btn-label { font-size: 9px; margin-top: 2px; font-weight: 700; }
 
-    #app {
-      max-width: 560px;
-      margin: 0 auto;
-      padding: 40px 20px 80px;
-      position: relative;
-      z-index: 1;
-    }
+/* Cards */
+.card { background: #fff; border-radius: 20px; padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); margin-bottom: 16px; }
+.card-title { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
 
-    /* ── HEADER ─────────────────────────────────── */
-    .header {
-      text-align: center;
-      margin-bottom: 36px;
-      position: relative;
-    }
-    .header-emoji { font-size: 52px; margin-bottom: 8px; }
-    .header h1 {
-      font-size: 26px;
-      font-weight: 800;
-      color: #4A3F5C;
-      letter-spacing: -0.02em;
-    }
-    .header p {
-      margin-top: 8px;
-      font-size: 14px;
-      color: #9B8EAC;
-    }
-    .btn-settings {
-      position: absolute;
-      top: 4px; right: 0;
-      background: rgba(255,255,255,0.8);
-      border: 2px solid #F0E6FF;
-      border-radius: 50%;
-      width: 40px; height: 40px;
-      font-size: 18px;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 2px 10px rgba(180,160,200,0.2);
-    }
-    .btn-settings:hover { transform: rotate(30deg); box-shadow: 0 4px 16px rgba(180,160,200,0.3); }
+/* Section labels */
+.section-label { font-size: 14px; font-weight: 700; color: #555; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
 
-    /* ── MODAL ──────────────────────────────────── */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(74, 63, 92, 0.4);
-      backdrop-filter: blur(6px);
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      animation: fadeIn 0.2s ease;
-    }
-    .modal-card {
-      background: white;
-      border-radius: 28px;
-      padding: 32px 28px;
-      width: 100%;
-      max-width: 420px;
-      box-shadow: 0 20px 60px rgba(74,63,92,0.2);
-      animation: fadeIn 0.3s ease;
-    }
-    .modal-header {
-      text-align: center;
-      margin-bottom: 28px;
-    }
-    .modal-header .modal-icon { font-size: 40px; margin-bottom: 10px; display: block; }
-    .modal-header h2 {
-      font-size: 20px;
-      font-weight: 800;
-      color: #4A3F5C;
-      margin-bottom: 6px;
-    }
-    .modal-header p {
-      font-size: 12px;
-      color: #9B8EAC;
-      line-height: 1.5;
-    }
-    .key-hint {
-      display: block;
-      font-size: 11px;
-      color: #BBA0CC;
-      margin-top: 5px;
-    }
-    .key-status {
-      display: inline-block;
-      font-size: 11px;
-      padding: 2px 8px;
-      border-radius: 20px;
-      margin-left: 6px;
-      font-weight: 600;
-    }
-    .key-status.set { background: #E0FFE8; color: #3A9E5C; }
-    .key-status.unset { background: #FFE8E8; color: #E05050; }
-    .btn-modal-close {
-      width: 100%;
-      margin-top: 8px;
-      padding: 10px;
-      background: transparent;
-      border: none;
-      font-size: 13px;
-      color: #BBA0CC;
-      cursor: pointer;
-      font-family: 'Nunito', sans-serif;
-    }
+/* Character selector */
+.char-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 4px 2px 8px; scrollbar-width: thin; }
+.char-scroll::-webkit-scrollbar { height: 4px; }
+.char-scroll::-webkit-scrollbar-track { background: #f0f0f0; border-radius: 2px; }
+.char-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
+.char-card { width: 90px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; padding: 10px 6px; border-radius: 14px; border: 2px solid transparent; transition: all 0.2s; background: #f9f9f9; }
+.char-card:hover { background: #fff0f5; border-color: #ffb3d1; }
+.char-card.selected { border-color: #ff6bae; box-shadow: 0 0 0 3px rgba(255,107,174,0.2); background: #fff0f5; }
+.char-photo { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid #eee; }
+.char-emoji { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #ffecd2, #fcb69f); display: flex; align-items: center; justify-content: center; font-size: 28px; border: 2px solid #eee; }
+.char-name { font-size: 12px; font-weight: 700; color: #444; text-align: center; word-break: break-all; }
+.char-empty { text-align: center; padding: 20px; color: #aaa; font-size: 13px; }
+.char-empty-btn { margin-top: 8px; background: #ff6bae; color: #fff; border: none; border-radius: 10px; padding: 6px 14px; font-size: 12px; cursor: pointer; font-family: inherit; }
 
-    /* ── CARDS ──────────────────────────────────── */
-    .card {
-      background: rgba(255,255,255,0.85);
-      border-radius: 28px;
-      padding: 28px 26px;
-      box-shadow: 0 8px 40px rgba(180,160,200,0.15);
-      backdrop-filter: blur(10px);
-      animation: fadeIn 0.4s ease;
-    }
+/* Textarea */
+textarea { width: 100%; border: 2px solid #eee; border-radius: 12px; padding: 12px; font-family: 'Nunito', sans-serif; font-size: 14px; resize: vertical; min-height: 100px; outline: none; transition: border-color 0.2s; }
+textarea:focus { border-color: #ff6bae; }
 
-    /* ── FORM ───────────────────────────────────── */
-    .form-label {
-      display: block;
-      font-size: 13px;
-      font-weight: 700;
-      color: #9B8EAC;
-      margin-bottom: 8px;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-    .form-input, .form-textarea {
-      width: 100%;
-      padding: 14px 16px;
-      border: 2px solid #F0E6FF;
-      border-radius: 14px;
-      font-size: 15px;
-      font-family: 'Nunito', sans-serif;
-      background: #FDFAFF;
-      color: #4A3F5C;
-      transition: border-color 0.2s;
-    }
-    .form-textarea {
-      font-size: 14px;
-      resize: none;
-      line-height: 1.7;
-    }
-    .form-input:focus, .form-textarea:focus { border-color: #C4A0D4; }
-    .form-group { margin-bottom: 20px; }
-    .form-group:last-of-type { margin-bottom: 24px; }
-    .required { color: #FF6B8A; }
+/* Buttons */
+.btn-primary { background: linear-gradient(135deg, #ff6bae, #a855f7); color: #fff; border: none; border-radius: 14px; padding: 14px 28px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; font-family: inherit; transition: all 0.2s; box-shadow: 0 4px 16px rgba(168,85,247,0.3); }
+.btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(168,85,247,0.4); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-secondary { background: #f0f0f0; color: #555; border: none; border-radius: 10px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+.btn-secondary:hover { background: #e0e0e0; }
+.btn-danger { background: #fee; color: #e44; border: none; border-radius: 10px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn-danger:hover { background: #fdd; }
 
-    /* ── BUTTONS ────────────────────────────────── */
-    .btn-primary {
-      width: 100%;
-      padding: 16px;
-      background: linear-gradient(135deg, #FFB3C6 0%, #C4A0D4 100%);
-      border: none;
-      border-radius: 16px;
-      font-size: 16px;
-      font-weight: 800;
-      color: white;
-      cursor: pointer;
-      font-family: 'Nunito', sans-serif;
-      box-shadow: 0 4px 20px rgba(196,160,212,0.4);
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
-    .btn-primary:disabled {
-      background: #E8E0EE;
-      color: #BBA0CC;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-    .btn-primary:not(:disabled):active { transform: scale(0.97); }
+/* Error */
+.error-msg { background: #fee; border: 1px solid #fcc; border-radius: 10px; padding: 10px 14px; color: #c00; font-size: 13px; margin-bottom: 12px; }
 
-    .btn-revise {
-      flex: 1;
-      padding: 14px;
-      background: linear-gradient(135deg, #B3D9FF 0%, #A0C4FF 100%);
-      border: none;
-      border-radius: 14px;
-      font-size: 14px;
-      font-weight: 800;
-      color: #2A5088;
-      cursor: pointer;
-      font-family: 'Nunito', sans-serif;
-      transition: transform 0.15s;
-    }
-    .btn-revise:disabled {
-      background: #E8E8EE;
-      color: #AAAACC;
-      cursor: not-allowed;
-    }
-    .btn-revise:not(:disabled):active { transform: scale(0.97); }
+/* Loading */
+.loading-card { background: #fff; border-radius: 20px; padding: 40px 20px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
+.spinner { width: 60px; height: 60px; border: 5px solid #f0f0f0; border-top-color: #ff6bae; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 18px; font-weight: 700; color: #444; margin-bottom: 8px; }
+.loading-sub { font-size: 13px; color: #888; }
 
-    .btn-finish {
-      flex: 1;
-      padding: 14px;
-      background: linear-gradient(135deg, #FFB3C6 0%, #C4A0D4 100%);
-      border: none;
-      border-radius: 14px;
-      font-size: 14px;
-      font-weight: 800;
-      color: white;
-      cursor: pointer;
-      font-family: 'Nunito', sans-serif;
-      box-shadow: 0 4px 16px rgba(196,160,212,0.4);
-      transition: transform 0.15s;
-    }
-    .btn-finish:disabled {
-      background: #E8E0EE;
-      color: #BBA0CC;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-    .btn-finish:active:not(:disabled) { transform: scale(0.97); }
+/* Review */
+.story-title-card { background: linear-gradient(135deg, #ff6bae, #a855f7); border-radius: 20px; padding: 24px; text-align: center; margin-bottom: 16px; box-shadow: 0 8px 32px rgba(168,85,247,0.3); }
+.story-title-text { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+.story-char-name { font-size: 14px; color: rgba(255,255,255,0.85); }
 
-    .btn-pdf {
-      width: 100%;
-      margin-top: 12px;
-      padding: 16px;
-      background: linear-gradient(135deg, #A0D4FF 0%, #80B8FF 100%);
-      border: none;
-      border-radius: 16px;
-      font-size: 16px;
-      font-weight: 800;
-      color: white;
-      cursor: pointer;
-      font-family: 'Nunito', sans-serif;
-      box-shadow: 0 4px 20px rgba(128,184,255,0.4);
-      transition: transform 0.15s, box-shadow 0.15s;
-      animation: fadeIn 0.5s ease;
-    }
-    .btn-pdf:disabled {
-      background: #E8E0EE;
-      color: #BBA0CC;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-    .btn-pdf:not(:disabled):active { transform: scale(0.97); }
+.page-card { background: #fff; border-radius: 20px; overflow: hidden; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.page-text-area { padding: 16px 20px; }
+.page-num { font-size: 11px; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.page-text { font-family: 'Nanum Myeongjo', serif; font-size: 15px; line-height: 1.7; color: #333; }
+.page-illus-label { font-size: 11px; color: #bbb; margin-top: 10px; }
+.page-illus-text { font-size: 12px; color: #999; font-style: italic; line-height: 1.5; }
+.page-img-area { background: #f8f8f8; min-height: 200px; display: flex; align-items: center; justify-content: center; position: relative; }
+.page-img-area img { width: 100%; display: block; }
+.page-img-placeholder { text-align: center; padding: 30px; color: #ccc; }
+.page-img-placeholder .emoji { font-size: 48px; display: block; margin-bottom: 8px; }
+.page-img-loading { position: absolute; inset: 0; background: rgba(255,255,255,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+.page-img-loading .mini-spinner { width: 36px; height: 36px; border: 3px solid #f0f0f0; border-top-color: #a855f7; border-radius: 50%; animation: spin 0.8s linear infinite; }
 
-    .btn-reset {
-      width: 100%;
-      margin-top: 10px;
-      padding: 10px;
-      background: transparent;
-      border: none;
-      font-size: 13px;
-      color: #BBA0CC;
-      cursor: pointer;
-      font-family: 'Nunito', sans-serif;
-    }
-    .btn-row { display: flex; gap: 10px; }
+.progress-banner { background: linear-gradient(135deg, #e8f4ff, #f3e8ff); border-radius: 14px; padding: 14px 18px; margin-bottom: 16px; }
+.progress-bar-wrap { background: #e0e0e0; border-radius: 99px; height: 8px; overflow: hidden; margin-top: 8px; }
+.progress-bar { background: linear-gradient(90deg, #ff6bae, #a855f7); height: 8px; border-radius: 99px; transition: width 0.4s; }
+.progress-text { font-size: 13px; color: #666; font-weight: 600; }
 
-    /* ── LOADING ────────────────────────────────── */
-    .loading-card {
-      background: rgba(255,255,255,0.85);
-      border-radius: 28px;
-      padding: 48px 26px;
-      box-shadow: 0 8px 40px rgba(180,160,200,0.15);
-      text-align: center;
-      backdrop-filter: blur(10px);
-      animation: fadeIn 0.4s ease;
-    }
-    .loading-emoji {
-      font-size: 56px;
-      margin-bottom: 16px;
-      display: block;
-      animation: spin 3s linear infinite;
-    }
-    .loading-title {
-      font-size: 17px;
-      font-weight: 700;
-      color: #4A3F5C;
-      margin-bottom: 6px;
-    }
-    .loading-sub {
-      font-size: 13px;
-      color: #9B8EAC;
-      margin-bottom: 20px;
-    }
-    .dots { display: flex; gap: 8px; justify-content: center; padding: 8px 0; }
-    .dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: #FFB3C6;
-    }
-    .dot:nth-child(1) { animation: bounce 1.2s ease-in-out 0s infinite; }
-    .dot:nth-child(2) { animation: bounce 1.2s ease-in-out 0.2s infinite; }
-    .dot:nth-child(3) { animation: bounce 1.2s ease-in-out 0.4s infinite; }
+.feedback-card { background: #fff; border-radius: 20px; padding: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); margin-bottom: 16px; }
+.feedback-label { font-size: 14px; font-weight: 700; color: #444; margin-bottom: 8px; }
+.feedback-btns { display: flex; gap: 10px; margin-top: 12px; }
+.feedback-btns button { flex: 1; }
 
-    /* ── STORY REVIEW ───────────────────────────── */
-    .title-card {
-      background: linear-gradient(135deg, #FFE8F5 0%, #E8E0FF 100%);
-      border-radius: 28px;
-      padding: 24px 26px 20px;
-      margin-bottom: 16px;
-      text-align: center;
-      box-shadow: 0 4px 24px rgba(196,160,212,0.2);
-      border: 2px solid rgba(255,255,255,0.8);
-      position: relative;
-      overflow: hidden;
-      animation: fadeIn 0.4s ease;
-    }
-    .title-card-emoji { font-size: 36px; margin-bottom: 8px; }
-    .title-card h2 {
-      font-size: 20px;
-      font-weight: 800;
-      color: #4A3F5C;
-    }
-    .title-card p {
-      margin-top: 6px;
-      font-size: 13px;
-      color: #9B8EAC;
-    }
-    .title-card-cloud {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      opacity: 0.18;
-      pointer-events: none;
-    }
+.pdf-btn { background: linear-gradient(135deg, #43e97b, #38f9d7); color: #fff; border: none; border-radius: 14px; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%; font-family: inherit; transition: all 0.2s; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(67,233,123,0.3); }
+.pdf-btn:hover { transform: translateY(-2px); }
 
-    .pages-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-    .page-card {
-      border-radius: 20px;
-      padding: 20px 22px;
-      border: 2px solid rgba(255,255,255,0.8);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-      position: relative;
-      overflow: hidden;
-      animation: fadeIn 0.4s ease;
-    }
-    .page-card-badge-emoji {
-      position: absolute;
-      top: 10px; right: 14px;
-      font-size: 28px;
-      opacity: 0.3;
-    }
-    .page-card-label {
-      font-size: 11px;
-      font-weight: 700;
-      color: #C4A0B8;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-    .page-card-text {
-      line-height: 1.8;
-      font-size: 14px;
-      color: #4A3F5C;
-      font-family: 'Nanum Myeongjo', Georgia, serif;
-    }
-    .page-card-text.illus {
-      font-style: italic;
-      opacity: 0.75;
-    }
+/* Settings Modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px); }
+.modal-overlay.hidden { display: none; }
+.modal-card { background: #fff; border-radius: 24px 24px 0 0; width: 100%; max-width: 560px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; }
+.modal-header { padding: 20px 20px 0; display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 18px; font-weight: 800; color: #333; }
+.modal-close { background: #f0f0f0; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.tab-bar { display: flex; gap: 4px; padding: 12px 16px 0; border-bottom: 1px solid #f0f0f0; }
+.tab-btn { flex: 1; background: none; border: none; border-bottom: 3px solid transparent; padding: 10px 4px; font-size: 13px; font-weight: 700; color: #aaa; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+.tab-btn.active { color: #ff6bae; border-bottom-color: #ff6bae; }
+.modal-body { flex: 1; overflow-y: auto; padding: 16px; }
 
-    /* ── IMAGE SLOT ─────────────────────────────── */
-    .img-slot {
-      margin-top: 14px;
-      border-radius: 14px;
-      overflow: hidden;
-      min-height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .img-slot-loading {
-      background: rgba(255,255,255,0.6);
-      padding: 16px;
-      border-radius: 14px;
-      text-align: center;
-      width: 100%;
-    }
-    .img-slot-loading .spin-emoji {
-      font-size: 28px;
-      display: block;
-      animation: spin 2s linear infinite;
-      margin-bottom: 6px;
-    }
-    .img-slot-loading p {
-      font-size: 12px;
-      color: #9B8EAC;
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-    .img-slot img {
-      width: 100%;
-      border-radius: 14px;
-      display: block;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-    }
-    .img-slot-error {
-      background: #FFF0F0;
-      padding: 12px;
-      border-radius: 14px;
-      text-align: center;
-      font-size: 12px;
-      color: #FF6B8A;
-      width: 100%;
-    }
+/* API tab */
+.api-status-row { display: flex; gap: 12px; margin-bottom: 16px; }
+.api-badge { flex: 1; background: #f8f8f8; border-radius: 12px; padding: 12px; text-align: center; }
+.api-badge-label { font-size: 11px; color: #888; margin-bottom: 4px; }
+.api-badge-status { font-size: 13px; font-weight: 700; }
+.status-set { color: #22c55e; }
+.status-unset { color: #ef4444; }
 
-    /* ── IMAGE PROGRESS BANNER ──────────────────── */
-    .img-progress-banner {
-      background: linear-gradient(135deg, #FFF3E0, #FFE0F5);
-      border-radius: 16px;
-      padding: 14px 18px;
-      margin-bottom: 14px;
-      text-align: center;
-      border: 2px solid rgba(255,255,255,0.8);
-      font-size: 13px;
-      font-weight: 700;
-      color: #7A5C8A;
-      animation: fadeIn 0.3s ease;
-    }
-    .img-progress-bar-wrap {
-      height: 6px;
-      background: rgba(255,255,255,0.7);
-      border-radius: 3px;
-      margin-top: 8px;
-      overflow: hidden;
-    }
-    .img-progress-bar {
-      height: 100%;
-      background: linear-gradient(90deg, #FFB3C6, #C4A0D4);
-      border-radius: 3px;
-      transition: width 0.5s ease;
-    }
+.accordion-trigger { background: linear-gradient(135deg, #ff6bae, #a855f7); color: #fff; border: none; border-radius: 12px; padding: 12px 20px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; font-family: inherit; margin-bottom: 12px; }
+.accordion-body { display: none; }
+.accordion-body.open { display: block; }
+.form-group { margin-bottom: 12px; }
+.form-label { font-size: 13px; font-weight: 600; color: #555; margin-bottom: 6px; display: block; }
+.form-input { width: 100%; border: 2px solid #eee; border-radius: 10px; padding: 10px 14px; font-size: 14px; font-family: inherit; outline: none; transition: border-color 0.2s; }
+.form-input:focus { border-color: #ff6bae; }
+.btn-save { background: #ff6bae; color: #fff; border: none; border-radius: 10px; padding: 10px 24px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; width: 100%; }
 
-    /* ── FEEDBACK ───────────────────────────────── */
-    .feedback-card {
-      background: rgba(255,255,255,0.9);
-      border-radius: 24px;
-      padding: 22px;
-      box-shadow: 0 4px 20px rgba(180,160,200,0.12);
-      backdrop-filter: blur(10px);
-      animation: fadeIn 0.4s ease;
-    }
-    .feedback-label {
-      font-size: 13px;
-      font-weight: 700;
-      color: #9B8EAC;
-      margin-bottom: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .feedback-textarea {
-      width: 100%;
-      padding: 12px 14px;
-      border: 2px solid #F0E6FF;
-      border-radius: 12px;
-      font-size: 13px;
-      font-family: 'Nunito', sans-serif;
-      background: #FDFAFF;
-      color: #4A3F5C;
-      resize: none;
-      line-height: 1.6;
-      margin-bottom: 14px;
-      transition: border-color 0.2s;
-    }
-    .feedback-textarea:focus { border-color: #C4A0D4; outline: none; }
+/* Characters tab */
+.char-list { display: flex; flex-direction: column; gap: 12px; }
+.char-list-card { display: flex; gap: 12px; align-items: center; background: #f9f9f9; border-radius: 14px; padding: 12px; }
+.char-list-photo { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.char-list-emoji { width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #ffecd2, #fcb69f); display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+.char-list-info { flex: 1; min-width: 0; }
+.char-list-name { font-size: 14px; font-weight: 700; color: #333; }
+.char-list-desc { font-size: 12px; color: #888; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.char-list-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.char-list-actions button { padding: 6px 10px; font-size: 12px; border-radius: 8px; border: none; cursor: pointer; font-family: inherit; font-weight: 600; }
+.btn-edit { background: #e8f4ff; color: #3b82f6; }
+.btn-delete { background: #fee; color: #e44; }
+.btn-add-char { background: linear-gradient(135deg, #ff6bae, #a855f7); color: #fff; border: none; border-radius: 12px; padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 14px; font-family: inherit; }
 
-    /* ── ERROR ──────────────────────────────────── */
-    .error-msg {
-      color: #FF6B8A;
-      font-size: 13px;
-      margin-bottom: 12px;
-      text-align: center;
-    }
+/* Char form */
+.char-form { display: none; }
+.char-form.open { display: block; }
+.photo-upload-area { border: 2px dashed #e0e0e0; border-radius: 14px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 12px; }
+.photo-upload-area:hover { border-color: #ff6bae; background: #fff0f5; }
+.photo-preview { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin: 0 auto 8px; display: block; }
+.photo-upload-hint { font-size: 13px; color: #aaa; }
 
-    /* ── HIDDEN ─────────────────────────────────── */
-    .hidden { display: none !important; }
-  </style>
+/* Style tab */
+.style-slots { display: flex; gap: 12px; }
+.style-slot { flex: 1; }
+.style-slot-box { border: 2px dashed #e0e0e0; border-radius: 14px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; transition: all 0.2s; background: #f8f8f8; }
+.style-slot-box:hover { border-color: #ff6bae; background: #fff0f5; }
+.style-slot-box img { width: 100%; height: 100%; object-fit: cover; }
+.style-slot-empty { text-align: center; color: #ccc; font-size: 13px; }
+.style-slot-empty .plus { font-size: 32px; display: block; }
+.style-remove { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.5); color: #fff; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.style-analyzing { position: absolute; inset: 0; background: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; font-size: 11px; color: #666; }
+
+/* Library */
+#library-view { display: none; }
+#library-view.active { display: block; }
+#main-view.hidden { display: none; }
+.library-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-top: 16px; }
+.back-btn { background: rgba(255,255,255,0.25); border: none; border-radius: 12px; padding: 8px 14px; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; backdrop-filter: blur(8px); }
+.library-title { font-size: 20px; font-weight: 800; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.library-card { background: #fff; border-radius: 16px; padding: 14px; display: flex; gap: 14px; align-items: flex-start; box-shadow: 0 4px 16px rgba(0,0,0,0.08); margin-bottom: 12px; }
+.library-thumb { width: 80px; height: 80px; border-radius: 12px; object-fit: cover; flex-shrink: 0; }
+.library-thumb-emoji { width: 80px; height: 80px; border-radius: 12px; background: linear-gradient(135deg, #ffecd2, #fcb69f); display: flex; align-items: center; justify-content: center; font-size: 40px; flex-shrink: 0; }
+.library-info { flex: 1; min-width: 0; }
+.library-story-title { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 4px; }
+.library-meta { font-size: 12px; color: #888; margin-bottom: 8px; }
+.library-actions { display: flex; gap: 8px; }
+.library-actions button { padding: 6px 12px; font-size: 12px; border-radius: 8px; border: none; cursor: pointer; font-family: inherit; font-weight: 600; }
+.library-empty { text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.7); }
+.library-empty .emoji { font-size: 60px; margin-bottom: 16px; }
+.library-empty p { font-size: 16px; }
+
+/* Toast */
+#toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(30,30,30,0.92); color: #fff; padding: 12px 24px; border-radius: 99px; font-size: 14px; font-weight: 600; z-index: 9999; pointer-events: none; opacity: 0; transition: all 0.3s; white-space: nowrap; }
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* PDF render */
+#pdf-render { position: fixed; left: -9999px; top: 0; pointer-events: none; }
+.pdf-page { width: 840px; height: 420px; display: flex; overflow: hidden; }
+.pdf-cover { width: 840px; height: 420px; background: linear-gradient(135deg, #ff6bae 0%, #a855f7 50%, #667eea 100%); display: flex; }
+.pdf-cover-left { width: 420px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 30px; }
+.pdf-cover-photo { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid rgba(255,255,255,0.5); }
+.pdf-cover-emoji-big { font-size: 80px; }
+.pdf-cover-title { font-size: 28px; font-weight: 800; color: #fff; text-align: center; text-shadow: 0 2px 8px rgba(0,0,0,0.2); font-family: 'Nanum Myeongjo', serif; }
+.pdf-cover-for { font-size: 16px; color: rgba(255,255,255,0.85); text-align: center; }
+.pdf-cover-right { width: 420px; display: flex; align-items: center; justify-content: center; font-size: 120px; }
+.pdf-left { width: 420px; height: 420px; padding: 36px 32px; display: flex; flex-direction: column; justify-content: center; position: relative; }
+.pdf-page-badge { position: absolute; top: 20px; right: 20px; width: 30px; height: 30px; border-radius: 50%; background: rgba(0,0,0,0.12); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.5); }
+.pdf-page-label { font-size: 10px; font-weight: 700; color: rgba(0,0,0,0.3); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; }
+.pdf-page-text { font-family: 'Nanum Myeongjo', serif; font-size: 16px; line-height: 1.8; color: #333; }
+.pdf-right { width: 420px; height: 420px; overflow: hidden; }
+.pdf-right img { width: 100%; height: 100%; object-fit: cover; }
+.pdf-right-placeholder { width: 100%; height: 100%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 60px; }
+
+/* Misc */
+.hidden { display: none !important; }
+.mt8 { margin-top: 8px; }
+.mt12 { margin-top: 12px; }
+.mt16 { margin-top: 16px; }
+
+.analyzing-overlay { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; color: #888; padding: 8px; }
+.mini-spin { width: 14px; height: 14px; border: 2px solid #eee; border-top-color: #ff6bae; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+</style>
 </head>
 <body>
 
-<!-- Background Stars -->
-<svg id="bg-stars" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
-  <circle cx="30"  cy="20"  r="2.5" fill="#FFD580" opacity="0.25"/>
-  <circle cx="80"  cy="60"  r="1.5" fill="#FFD580" opacity="0.25"/>
-  <circle cx="150" cy="15"  r="2.5" fill="#FFD580" opacity="0.25"/>
-  <circle cx="220" cy="45"  r="1.5" fill="#FFD580" opacity="0.25"/>
-  <circle cx="310" cy="25"  r="2.5" fill="#FFD580" opacity="0.25"/>
-  <circle cx="370" cy="70"  r="1.5" fill="#FFD580" opacity="0.25"/>
-  <circle cx="50"  cy="120" r="1.5" fill="#FFD580" opacity="0.25"/>
-  <circle cx="130" cy="100" r="2.5" fill="#FFD580" opacity="0.25"/>
-  <circle cx="200" cy="130" r="1.5" fill="#FFD580" opacity="0.25"/>
-  <circle cx="280" cy="90"  r="1.5" fill="#FFD580" opacity="0.25"/>
-  <circle cx="350" cy="140" r="2.5" fill="#FFD580" opacity="0.25"/>
-  <circle cx="20"  cy="200" r="1.5" fill="#FFD580" opacity="0.25"/>
-  <circle cx="90"  cy="180" r="2.5" fill="#FFD580" opacity="0.25"/>
-  <circle cx="170" cy="210" r="1.5" fill="#FFD580" opacity="0.25"/>
-  <circle cx="250" cy="170" r="1.5" fill="#FFD580" opacity="0.25"/>
-  <circle cx="330" cy="200" r="2.5" fill="#FFD580" opacity="0.25"/>
-  <circle cx="380" cy="230" r="1.5" fill="#FFD580" opacity="0.25"/>
-</svg>
+<!-- Toast -->
+<div id="toast"></div>
 
-<!-- API Key Modal -->
-<div id="api-modal-overlay" class="modal-overlay hidden">
+<!-- PDF Render Area (off-screen) -->
+<div id="pdf-render"></div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay hidden" id="settings-modal">
   <div class="modal-card">
     <div class="modal-header">
-      <span class="modal-icon">🔑</span>
-      <h2>API 키 설정</h2>
-      <p>API 키는 이 기기의 브라우저에만 저장되며<br>외부로 전송되지 않습니다.</p>
+      <span class="modal-title">⚙️ 설정</span>
+      <button class="modal-close" onclick="closeSettings()">✕</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">
-        Anthropic API Key <span class="required">*</span>
-        <span id="anthropic-key-status" class="key-status unset">미설정</span>
-      </label>
-      <input id="modal-anthropic-key" class="form-input" type="password"
-        placeholder="sk-ant-api03-..." autocomplete="off" />
-      <small class="key-hint">Claude로 동화 텍스트를 생성합니다.</small>
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab-api-btn" onclick="switchSettingsTab('api')">🔑 API 키</button>
+      <button class="tab-btn" id="tab-chars-btn" onclick="switchSettingsTab('chars')">👤 등장인물</button>
+      <button class="tab-btn" id="tab-style-btn" onclick="switchSettingsTab('style')">🎨 스타일</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">
-        OpenAI API Key
-        <span id="openai-key-status" class="key-status unset">미설정</span>
-      </label>
-      <input id="modal-openai-key" class="form-input" type="password"
-        placeholder="sk-proj-..." autocomplete="off" />
-      <small class="key-hint">DALL-E 3으로 삽화 이미지를 생성합니다. (완성하기 기능에 필요)</small>
+    <div class="modal-body">
+      <!-- API Tab -->
+      <div id="tab-api" class="tab-content">
+        <div class="api-status-row">
+          <div class="api-badge">
+            <div class="api-badge-label">Anthropic</div>
+            <div class="api-badge-status" id="anthropic-status">미설정</div>
+          </div>
+          <div class="api-badge">
+            <div class="api-badge-label">OpenAI</div>
+            <div class="api-badge-status" id="openai-status">미설정</div>
+          </div>
+        </div>
+        <button class="accordion-trigger" onclick="toggleApiInputs()">🔑 API 입력하기</button>
+        <div class="accordion-body" id="api-accordion">
+          <div class="form-group">
+            <label class="form-label">Anthropic API Key</label>
+            <input type="password" class="form-input" id="anthropic-key-input" placeholder="sk-ant-...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">OpenAI API Key</label>
+            <input type="password" class="form-input" id="openai-key-input" placeholder="sk-...">
+          </div>
+          <button class="btn-save" onclick="saveApiKeys()">저장하기</button>
+        </div>
+      </div>
+      <!-- Characters Tab -->
+      <div id="tab-chars" class="tab-content hidden">
+        <div id="char-list-section">
+          <div class="char-list" id="char-list"></div>
+          <button class="btn-add-char" onclick="showCharForm(null)">＋ 등장인물 추가</button>
+        </div>
+        <div class="char-form" id="char-form">
+          <div class="photo-upload-area" onclick="triggerPhotoUpload()" id="photo-upload-area">
+            <img class="photo-preview hidden" id="photo-preview" src="" alt="preview">
+            <div id="photo-upload-hint">
+              <span style="font-size:36px">📷</span>
+              <p class="photo-upload-hint">사진을 클릭해서 업로드</p>
+            </div>
+          </div>
+          <input type="file" id="photo-file-input" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
+          <div class="form-group">
+            <label class="form-label">이름</label>
+            <input type="text" class="form-input" id="char-name-input" placeholder="등장인물 이름">
+          </div>
+          <div class="form-group">
+            <label class="form-label">특징 / 설명</label>
+            <textarea class="form-input" id="char-desc-input" placeholder="이 등장인물의 특징을 적어주세요" style="min-height:80px; resize:vertical;"></textarea>
+          </div>
+          <div id="vision-analyzing" class="analyzing-overlay hidden">
+            <span class="mini-spin"></span> 사진 분석 중...
+          </div>
+          <div style="display:flex; gap:10px; margin-top:12px;">
+            <button class="btn-secondary" style="flex:1" onclick="cancelCharForm()">취소</button>
+            <button class="btn-primary" style="flex:2; padding:10px;" id="save-char-btn" onclick="saveCharacter()">저장</button>
+          </div>
+        </div>
+      </div>
+      <!-- Style Tab -->
+      <div id="tab-style" class="tab-content hidden">
+        <div class="section-label" style="margin-bottom:12px;">🖼️ 일러스트 스타일 레퍼런스 (선택)</div>
+        <div class="style-slots" id="style-slots">
+          <div class="style-slot" id="style-slot-0">
+            <div class="style-slot-box" onclick="triggerStyleUpload(0)">
+              <div class="style-slot-empty"><span class="plus">＋</span>추가</div>
+            </div>
+            <input type="file" id="style-file-0" accept="image/*" class="hidden" onchange="handleStyleUpload(0, event)">
+          </div>
+          <div class="style-slot" id="style-slot-1">
+            <div class="style-slot-box" onclick="triggerStyleUpload(1)">
+              <div class="style-slot-empty"><span class="plus">＋</span>추가</div>
+            </div>
+            <input type="file" id="style-file-1" accept="image/*" class="hidden" onchange="handleStyleUpload(1, event)">
+          </div>
+          <div class="style-slot" id="style-slot-2">
+            <div class="style-slot-box" onclick="triggerStyleUpload(2)">
+              <div class="style-slot-empty"><span class="plus">＋</span>추가</div>
+            </div>
+            <input type="file" id="style-file-2" accept="image/*" class="hidden" onchange="handleStyleUpload(2, event)">
+          </div>
+        </div>
+      </div>
     </div>
-    <p id="modal-error" class="error-msg hidden"></p>
-    <button id="btn-save-keys" class="btn-primary">저장하기 ✓</button>
-    <button id="btn-close-modal" class="btn-modal-close">닫기</button>
   </div>
 </div>
 
+<!-- Main App -->
 <div id="app">
-
-  <!-- HEADER -->
+  <!-- Header -->
   <div class="header">
-    <div class="header-emoji">📚</div>
-    <h1>지호의 동화책 메이커</h1>
-    <p>세상에 하나뿐인 우리 아이 맞춤 동화 ✨</p>
-    <button id="btn-settings" class="btn-settings" title="API 키 설정">⚙️</button>
-  </div>
-
-  <!-- STEP: INPUT -->
-  <div id="step-input" class="card">
-    <div class="form-group">
-      <label class="form-label">🌟 주인공 이름</label>
-      <input id="child-name" class="form-input" type="text" placeholder="예: 지호" />
+    <div class="header-left-btns">
+      <button class="icon-btn" onclick="showLibrary()">📚<span class="icon-btn-label">라이브러리</span></button>
     </div>
-    <div class="form-group">
-      <label class="form-label">📝 이야기 개요</label>
-      <textarea id="synopsis" class="form-textarea" rows="4"
-        placeholder="예: 지호가 처음으로 혼자 어린이집에 가는 날, 낯선 친구를 만나서 사이좋게 노는 이야기"></textarea>
-    </div>
-    <p id="error-msg" class="error-msg hidden"></p>
-    <button id="btn-generate" class="btn-primary" disabled>동화 만들기 🪄</button>
-  </div>
-
-  <!-- STEP: LOADING -->
-  <div id="step-loading" class="loading-card hidden">
-    <span class="loading-emoji">✨</span>
-    <p class="loading-title" id="loading-title">동화를 쓰고 있어요...</p>
-    <p class="loading-sub" id="loading-sub">만을 위한 이야기를 만드는 중이에요 🌸</p>
-    <div class="dots">
-      <div class="dot"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
+    <div class="header-title">📖 동화책 메이커</div>
+    <div class="header-subtitle">세상에 하나뿐인 우리 아이 맞춤 동화 ✨</div>
+    <div class="header-btns">
+      <button class="icon-btn" onclick="openSettings('api')">⚙️<span class="icon-btn-label">설정</span></button>
     </div>
   </div>
 
-  <!-- STEP: REVIEW -->
-  <div id="step-review" class="hidden">
-
-    <!-- Title card -->
-    <div class="title-card">
-      <svg class="title-card-cloud" viewBox="0 0 200 80">
-        <ellipse cx="100" cy="50" rx="90" ry="35" fill="#B5CEFF"/>
-        <ellipse cx="60"  cy="45" rx="50" ry="28" fill="#C8D9FF"/>
-        <ellipse cx="150" cy="48" rx="45" ry="26" fill="#C8D9FF"/>
-        <ellipse cx="100" cy="35" rx="55" ry="30" fill="#D4E3FF"/>
-      </svg>
-      <div class="title-card-emoji">📖</div>
-      <h2 id="story-title">제목</h2>
-      <p id="story-meta"></p>
+  <!-- Main View -->
+  <div id="main-view">
+    <!-- Input Step -->
+    <div id="step-input">
+      <!-- Character selector -->
+      <div class="card">
+        <div class="card-title">👤 주인공 선택</div>
+        <div id="char-selector-area"></div>
+      </div>
+      <!-- Synopsis -->
+      <div class="card">
+        <div class="card-title">📝 이야기 개요</div>
+        <textarea id="synopsis-input" placeholder="어떤 이야기를 만들고 싶으신가요? 간단히 적어주세요.&#10;예: 토끼가 숲속에서 새 친구를 만나 함께 모험을 떠나는 이야기" oninput="onSynopsisInput()"></textarea>
+      </div>
+      <div id="input-error" class="error-msg hidden"></div>
+      <button class="btn-primary" id="make-btn" onclick="makeStory()" disabled>동화 만들기 🪄</button>
     </div>
 
-    <!-- Image generation progress (hidden until finish is clicked) -->
-    <div id="img-progress-banner" class="img-progress-banner hidden">
-      <span id="img-progress-text">🎨 삽화를 그리고 있어요...</span>
-      <div class="img-progress-bar-wrap">
-        <div id="img-progress-bar" class="img-progress-bar" style="width:0%"></div>
+    <!-- Loading Step -->
+    <div id="step-loading" class="hidden">
+      <div class="loading-card">
+        <div class="spinner"></div>
+        <div class="loading-text">동화를 만들고 있어요...</div>
+        <div class="loading-sub">잠시만 기다려주세요 ✨</div>
       </div>
     </div>
 
-    <!-- Pages -->
-    <div id="pages-list" class="pages-list"></div>
-
-    <!-- Feedback -->
-    <div id="feedback-section" class="feedback-card">
-      <p class="feedback-label">💬 피드백 (선택)</p>
-      <textarea id="feedback" class="feedback-textarea" rows="3"
-        placeholder="예: 5페이지 내용을 좀 더 재미있게 바꿔줘&#10;예: 결말이 너무 짧아, 좀 더 따뜻하게 마무리해줘"></textarea>
-      <div class="btn-row">
-        <button id="btn-revise" class="btn-revise" disabled>✏️ 수정하기</button>
-        <button id="btn-finish" class="btn-finish">🎉 완성하기</button>
+    <!-- Review Step -->
+    <div id="step-review" class="hidden">
+      <div class="story-title-card">
+        <div class="story-title-text" id="review-title"></div>
+        <div class="story-char-name" id="review-char-name"></div>
       </div>
-      <button id="btn-pdf" class="btn-pdf hidden" disabled>📄 PDF로 저장하기</button>
-      <button id="btn-reset" class="btn-reset">← 처음부터 다시 만들기</button>
+      <div id="progress-banner" class="progress-banner hidden">
+        <div class="progress-text" id="progress-text">그림 생성 중...</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+        </div>
+      </div>
+      <div id="pages-list"></div>
+      <div class="feedback-card" id="feedback-section">
+        <div class="feedback-label">💬 수정 요청 (선택)</div>
+        <textarea id="feedback-input" placeholder="수정하고 싶은 부분이 있으면 적어주세요" oninput="appState.feedback=this.value"></textarea>
+        <div class="feedback-btns">
+          <button class="btn-secondary" onclick="reviseStory()">✏️ 수정하기</button>
+          <button class="btn-primary" style="padding:10px;" onclick="finishStory()">✅ 완성하기</button>
+        </div>
+      </div>
+      <button class="pdf-btn hidden" id="pdf-btn" onclick="savePDF()">📄 PDF로 저장하기</button>
     </div>
   </div>
 
+  <!-- Library View -->
+  <div id="library-view">
+    <div class="library-header">
+      <button class="back-btn" onclick="hideLibrary()">← 돌아가기</button>
+      <div class="library-title">📚 나의 동화 라이브러리</div>
+    </div>
+    <div id="library-list"></div>
+  </div>
 </div>
 
 <script>
-// ── State ──────────────────────────────────────────────
-let state = {
-  childName: "",
-  synopsis: "",
-  feedback: "",
-  storyData: null,   // { title, pages: [{text, illustration, imageDataUrl?}] }
-  step: "input",     // input | loading | review
-  imagesGenerated: false,
-};
-
-// ── DOM refs ───────────────────────────────────────────
-const $ = id => document.getElementById(id);
-const stepInput    = $("step-input");
-const stepLoading  = $("step-loading");
-const stepReview   = $("step-review");
-const inputName    = $("child-name");
-const inputSynop   = $("synopsis");
-const inputFeedback = $("feedback");
-const btnGenerate  = $("btn-generate");
-const btnRevise    = $("btn-revise");
-const btnFinish    = $("btn-finish");
-const btnReset     = $("btn-reset");
-const btnPDF       = $("btn-pdf");
-const errorMsg     = $("error-msg");
-const pagesList    = $("pages-list");
-const feedbackSection = $("feedback-section");
-
-// Page colors / emojis
+// ============================================================
+// CONSTANTS
+// ============================================================
 const PAGE_COLORS = ["#FFE8F0","#E8F4FF","#FFF3E0","#E8FFE8","#F3E8FF","#FFF8E0","#E0F8FF"];
 const PAGE_EMOJIS = ["🌸","⭐","🌈","🍀","🌙","🌻","🦋"];
+const PDF_BG_COLORS = ['#FFE8F0','#E8F4FF','#FFF3E0','#E8FFE8','#F3E8FF','#FFF8E0','#E0F8FF'];
 
-// ── Key management ─────────────────────────────────────
-function getAnthropicKey() { return localStorage.getItem('jiho_anthropic_key') || ''; }
-function getOpenAIKey()    { return localStorage.getItem('jiho_openai_key') || ''; }
+// ============================================================
+// STATE
+// ============================================================
+const appState = {
+  selectedCharacter: null,
+  synopsis: '',
+  storyData: null,
+  step: 'input',
+  imagesGenerated: false,
+  feedback: '',
+  settingsOpen: false,
+  activeSettingsTab: 'api',
+  showApiInputs: false,
+  editingCharacterId: null,
+  characters: [],
+  styleRefs: [],
+  library: [],
+  currentView: 'main',
+  // temp char form
+  tempPhotoDataUrl: null,
+};
 
-function saveKeys(aKey, oKey) {
-  if (aKey) localStorage.setItem('jiho_anthropic_key', aKey);
-  if (oKey) localStorage.setItem('jiho_openai_key', oKey);
+// ============================================================
+// INDEXEDDB
+// ============================================================
+const DB_NAME = 'story_maker_db';
+const DB_VERSION = 1;
+let _db = null;
+
+function openDB() {
+  if (_db) return Promise.resolve(_db);
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('characters')) db.createObjectStore('characters', { keyPath: 'id', autoIncrement: true });
+      if (!db.objectStoreNames.contains('style_refs')) db.createObjectStore('style_refs', { keyPath: 'id', autoIncrement: true });
+      if (!db.objectStoreNames.contains('library')) db.createObjectStore('library', { keyPath: 'id', autoIncrement: true });
+    };
+    req.onsuccess = e => { _db = e.target.result; resolve(_db); };
+    req.onerror = e => reject(e.target.error);
+  });
+}
+function dbGetAll(store) {
+  return openDB().then(db => new Promise((res, rej) => {
+    const req = db.transaction(store,'readonly').objectStore(store).getAll();
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej(req.error);
+  }));
+}
+function dbAdd(store, record) {
+  return openDB().then(db => new Promise((res, rej) => {
+    const req = db.transaction(store,'readwrite').objectStore(store).add(record);
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej(req.error);
+  }));
+}
+function dbPut(store, record) {
+  return openDB().then(db => new Promise((res, rej) => {
+    const req = db.transaction(store,'readwrite').objectStore(store).put(record);
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej(req.error);
+  }));
+}
+function dbDelete(store, id) {
+  return openDB().then(db => new Promise((res, rej) => {
+    const req = db.transaction(store,'readwrite').objectStore(store).delete(id);
+    req.onsuccess = () => res();
+    req.onerror = () => rej(req.error);
+  }));
 }
 
-function updateKeyStatusBadges() {
-  const aBadge = $('anthropic-key-status');
-  const oBadge = $('openai-key-status');
-  if (getAnthropicKey()) {
-    aBadge.textContent = '설정됨'; aBadge.className = 'key-status set';
-  } else {
-    aBadge.textContent = '미설정'; aBadge.className = 'key-status unset';
+// ============================================================
+// LOCALSTORAGE - API KEYS
+// ============================================================
+function getAnthropicKey() { return localStorage.getItem('sm_anthropic_key') || ''; }
+function getOpenAIKey() { return localStorage.getItem('sm_openai_key') || ''; }
+function saveApiKeys() {
+  const ak = document.getElementById('anthropic-key-input').value.trim();
+  const ok = document.getElementById('openai-key-input').value.trim();
+  if (ak) localStorage.setItem('sm_anthropic_key', ak);
+  if (ok) localStorage.setItem('sm_openai_key', ok);
+  updateApiStatusBadges();
+  showToast('API 키가 저장됐어요 ✓');
+}
+function updateApiStatusBadges() {
+  const aEl = document.getElementById('anthropic-status');
+  const oEl = document.getElementById('openai-status');
+  if (getAnthropicKey()) { aEl.textContent = '설정됨'; aEl.className = 'api-badge-status status-set'; }
+  else { aEl.textContent = '미설정'; aEl.className = 'api-badge-status status-unset'; }
+  if (getOpenAIKey()) { oEl.textContent = '설정됨'; oEl.className = 'api-badge-status status-set'; }
+  else { oEl.textContent = '미설정'; oEl.className = 'api-badge-status status-unset'; }
+}
+function toggleApiInputs() {
+  const body = document.getElementById('api-accordion');
+  body.classList.toggle('open');
+  if (body.classList.contains('open')) {
+    document.getElementById('anthropic-key-input').value = getAnthropicKey();
+    document.getElementById('openai-key-input').value = getOpenAIKey();
   }
-  if (getOpenAIKey()) {
-    oBadge.textContent = '설정됨'; oBadge.className = 'key-status set';
-  } else {
-    oBadge.textContent = '미설정'; oBadge.className = 'key-status unset';
-  }
 }
 
-// ── Modal ──────────────────────────────────────────────
-function showModal(errorText) {
-  $('modal-anthropic-key').value = '';
-  $('modal-openai-key').value = '';
-  $('modal-error').classList.add('hidden');
-  if (errorText) {
-    $('modal-error').textContent = errorText;
-    $('modal-error').classList.remove('hidden');
-  }
-  updateKeyStatusBadges();
-  $('api-modal-overlay').classList.remove('hidden');
+// ============================================================
+// UTILITIES
+// ============================================================
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
-function hideModal() {
-  $('api-modal-overlay').classList.add('hidden');
+function showToast(msg, duration = 2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
 }
 
-$('btn-settings').addEventListener('click', () => showModal());
-$('btn-close-modal').addEventListener('click', hideModal);
-$('api-modal-overlay').addEventListener('click', e => {
-  if (e.target === $('api-modal-overlay')) hideModal();
-});
-
-$('btn-save-keys').addEventListener('click', () => {
-  const aKey = $('modal-anthropic-key').value.trim();
-  const oKey = $('modal-openai-key').value.trim();
-
-  if (!aKey && !getAnthropicKey()) {
-    $('modal-error').textContent = 'Anthropic API Key는 필수입니다.';
-    $('modal-error').classList.remove('hidden');
-    return;
-  }
-  saveKeys(aKey, oKey);
-  updateKeyStatusBadges();
-  hideModal();
-});
-
-// ── UI helpers ─────────────────────────────────────────
-function showStep(name) {
-  stepInput.classList.toggle("hidden",   name !== "input");
-  stepLoading.classList.toggle("hidden", name !== "loading");
-  stepReview.classList.toggle("hidden",  name !== "review");
-  state.step = name;
-}
-
-function showError(msg) {
-  errorMsg.textContent = msg;
-  errorMsg.classList.remove("hidden");
-}
-function clearError() {
-  errorMsg.textContent = "";
-  errorMsg.classList.add("hidden");
-}
-
-function updateGenerateBtn() {
-  btnGenerate.disabled = !(inputName.value.trim() && inputSynop.value.trim());
-}
-
-function updateReviseBtn() {
-  btnRevise.disabled = !inputFeedback.value.trim();
-}
-
-// ── Render pages ───────────────────────────────────────
-function renderPages(storyData) {
-  pagesList.innerHTML = "";
-  storyData.pages.forEach((page, i) => {
-    const textCard = makeTextCard(i, page.text);
-    pagesList.appendChild(textCard);
-
-    const illusCard = makeIllusCard(i, page.illustration, page.imageDataUrl);
-    pagesList.appendChild(illusCard);
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
   });
 }
 
-function makeTextCard(i, text) {
-  const card = document.createElement("div");
-  card.className = "page-card";
-  card.style.background = PAGE_COLORS[i % PAGE_COLORS.length];
-
-  card.innerHTML = `
-    <div class="page-card-badge-emoji">${PAGE_EMOJIS[i % PAGE_EMOJIS.length]}</div>
-    <div class="page-card-label">📖 ${i + 1}페이지</div>
-    <p class="page-card-text">${escHtml(text)}</p>
-  `;
-  return card;
+async function resizeImage(dataUrl, maxPx = 512) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let w = img.naturalWidth, h = img.naturalHeight;
+      const max = Math.max(w, h);
+      if (max > maxPx) { const r = maxPx / max; w = Math.round(w*r); h = Math.round(h*r); }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', 0.88));
+    };
+    img.src = dataUrl;
+  });
 }
 
-function makeIllusCard(i, illustration, imageDataUrl) {
-  const card = document.createElement("div");
-  card.className = "page-card";
-  card.id = `illus-card-${i}`;
-  card.style.background = PAGE_COLORS[i % PAGE_COLORS.length];
-
-  let imgSlotHtml = '';
-  if (imageDataUrl) {
-    imgSlotHtml = `<div class="img-slot"><img src="${imageDataUrl}" alt="삽화 ${i+1}" /></div>`;
-  }
-
-  card.innerHTML = `
-    <div class="page-card-badge-emoji">🎨</div>
-    <div class="page-card-label">🎨 삽화 설명</div>
-    <p class="page-card-text illus">[삽화] ${escHtml(illustration)}</p>
-    ${imgSlotHtml}
-  `;
-  return card;
+function formatKoreanDate(ts) {
+  const d = new Date(ts);
+  return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일`;
 }
 
-function setImageSlotLoading(i) {
-  const card = $(`illus-card-${i}`);
-  if (!card) return;
-  let slot = card.querySelector('.img-slot');
-  if (!slot) {
-    slot = document.createElement('div');
-    slot.className = 'img-slot';
-    card.appendChild(slot);
+// ============================================================
+// GPT VISION
+// ============================================================
+async function analyzeImageWithVision(dataUrl, prompt) {
+  const base64 = dataUrl.split(',')[1];
+  const mimeType = dataUrl.split(';')[0].split(':')[1];
+  const resp = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getOpenAIKey()}`
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      max_tokens: 200,
+      messages: [{
+        role: "user",
+        content: [
+          { type: "image_url", image_url: { url: `data:${mimeType};base64,${base64}`, detail: "low" } },
+          { type: "text", text: prompt }
+        ]
+      }]
+    })
+  });
+  const data = await resp.json();
+  return data.choices?.[0]?.message?.content?.trim() || '';
+}
+
+async function analyzeCharacterPhoto(dataUrl) {
+  return analyzeImageWithVision(dataUrl,
+    "Describe this person/character's visual appearance for children's book illustration in 2 sentences. Be specific about face shape, skin tone, hair color/style, eye color, distinctive features. Write in English only."
+  );
+}
+
+async function analyzeStyleRef(dataUrl) {
+  return analyzeImageWithVision(dataUrl,
+    "Describe this illustration's art style in 1-2 sentences for use as a DALL-E style prompt. Focus on: art technique (watercolor/digital/etc), color palette, line quality, mood. English only."
+  );
+}
+
+// ============================================================
+// SETTINGS MODAL
+// ============================================================
+function openSettings(tab) {
+  appState.settingsOpen = true;
+  document.getElementById('settings-modal').classList.remove('hidden');
+  switchSettingsTab(tab || 'api');
+  updateApiStatusBadges();
+}
+
+function closeSettings() {
+  appState.settingsOpen = false;
+  document.getElementById('settings-modal').classList.add('hidden');
+  cancelCharForm();
+  renderCharSelector();
+}
+
+function switchSettingsTab(tab) {
+  appState.activeSettingsTab = tab;
+  ['api','chars','style'].forEach(t => {
+    document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== tab);
+    document.getElementById(`tab-${t}-btn`).classList.toggle('active', t === tab);
+  });
+  if (tab === 'chars') renderCharList();
+  if (tab === 'style') renderStyleSlots();
+}
+
+// ============================================================
+// CHARACTERS
+// ============================================================
+async function loadCharacters() {
+  appState.characters = await dbGetAll('characters');
+  renderCharSelector();
+}
+
+function renderCharList() {
+  const list = document.getElementById('char-list');
+  const chars = appState.characters;
+  if (chars.length === 0) {
+    list.innerHTML = '<div style="text-align:center;color:#aaa;padding:20px;font-size:13px;">등장인물이 없어요</div>';
+    return;
   }
-  slot.innerHTML = `
-    <div class="img-slot-loading">
-      <span class="spin-emoji">🎨</span>
-      <p>따뜻한 수채화 그림을 그리고 있어요...</p>
+  list.innerHTML = chars.map(c => `
+    <div class="char-list-card">
+      ${c.photoDataUrl
+        ? `<img class="char-list-photo" src="${escHtml(c.photoDataUrl)}" alt="${escHtml(c.name)}">`
+        : `<div class="char-list-emoji">👤</div>`}
+      <div class="char-list-info">
+        <div class="char-list-name">${escHtml(c.name)}</div>
+        <div class="char-list-desc">${escHtml(c.description)}</div>
+      </div>
+      <div class="char-list-actions">
+        <button class="btn-edit" onclick="showCharForm(${c.id})">✏️</button>
+        <button class="btn-delete" onclick="deleteCharacter(${c.id})">🗑️</button>
+      </div>
     </div>
-  `;
+  `).join('');
 }
 
-function setImageSlotDone(i, dataUrl) {
-  const card = $(`illus-card-${i}`);
-  if (!card) return;
-  let slot = card.querySelector('.img-slot');
-  if (!slot) {
-    slot = document.createElement('div');
-    slot.className = 'img-slot';
-    card.appendChild(slot);
+function renderCharSelector() {
+  const area = document.getElementById('char-selector-area');
+  const chars = appState.characters;
+  if (chars.length === 0) {
+    area.innerHTML = `<div class="char-empty">
+      등장인물이 없어요. 설정에서 추가해주세요.
+      <br><button class="char-empty-btn" onclick="openSettings('chars')">설정 열기</button>
+    </div>`;
+    return;
   }
-  const img = document.createElement('img');
-  img.src = dataUrl;
-  img.alt = `삽화 ${i + 1}`;
-  slot.innerHTML = '';
-  slot.appendChild(img);
+  area.innerHTML = `<div class="char-scroll">${chars.map(c => {
+    const selected = appState.selectedCharacter && appState.selectedCharacter.id === c.id;
+    return `<div class="char-card ${selected ? 'selected' : ''}" onclick="selectCharacter(${c.id})">
+      ${c.photoDataUrl
+        ? `<img class="char-photo" src="${escHtml(c.photoDataUrl)}" alt="${escHtml(c.name)}">`
+        : `<div class="char-emoji">👤</div>`}
+      <div class="char-name">${escHtml(c.name)}</div>
+    </div>`;
+  }).join('')}</div>`;
+  updateMakeBtn();
 }
 
-function setImageSlotError(i, msg) {
-  const card = $(`illus-card-${i}`);
-  if (!card) return;
-  let slot = card.querySelector('.img-slot');
-  if (!slot) {
-    slot = document.createElement('div');
-    slot.className = 'img-slot';
-    card.appendChild(slot);
+function selectCharacter(id) {
+  appState.selectedCharacter = appState.characters.find(c => c.id === id) || null;
+  renderCharSelector();
+}
+
+function showCharForm(id) {
+  appState.editingCharacterId = id;
+  appState.tempPhotoDataUrl = null;
+  document.getElementById('char-list-section').style.display = 'none';
+  const form = document.getElementById('char-form');
+  form.classList.add('open');
+  document.getElementById('photo-preview').classList.add('hidden');
+  document.getElementById('photo-upload-hint').style.display = '';
+  document.getElementById('vision-analyzing').classList.add('hidden');
+  if (id) {
+    const c = appState.characters.find(ch => ch.id === id);
+    if (c) {
+      document.getElementById('char-name-input').value = c.name;
+      document.getElementById('char-desc-input').value = c.description;
+      if (c.photoDataUrl) {
+        appState.tempPhotoDataUrl = c.photoDataUrl;
+        const prev = document.getElementById('photo-preview');
+        prev.src = c.photoDataUrl;
+        prev.classList.remove('hidden');
+        document.getElementById('photo-upload-hint').style.display = 'none';
+      }
+    }
+  } else {
+    document.getElementById('char-name-input').value = '';
+    document.getElementById('char-desc-input').value = '';
   }
-  slot.innerHTML = `<div class="img-slot-error">⚠️ 이미지 생성 실패: ${escHtml(msg)}</div>`;
 }
 
-function escHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function cancelCharForm() {
+  document.getElementById('char-list-section').style.display = '';
+  document.getElementById('char-form').classList.remove('open');
+  appState.editingCharacterId = null;
+  appState.tempPhotoDataUrl = null;
 }
 
-// ── Claude API ─────────────────────────────────────────
-const SYSTEM_PROMPT = `당신은 어린이 동화 작가입니다. '추피' 시리즈처럼 2~5세 아이를 위한 따뜻하고 일상적인 동화를 씁니다.
+function triggerPhotoUpload() {
+  document.getElementById('photo-file-input').click();
+}
 
-스타일 가이드:
-- 일상적인 소재(밥 먹기, 잠자기, 친구 사귀기 등)를 친근하게 표현
-- 문장은 짧고 리드미컬하게 (한 문장에 15자 내외)
-- 주인공 이름을 자주 불러서 몰입감 형성
-- 무겁지 않되 작은 메시지 하나가 담길 것
-- 각 페이지는 2~4문장 분량
+async function handlePhotoUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const raw = await fileToDataUrl(file);
+  const resized = await resizeImage(raw, 512);
+  appState.tempPhotoDataUrl = resized;
+  const prev = document.getElementById('photo-preview');
+  prev.src = resized;
+  prev.classList.remove('hidden');
+  document.getElementById('photo-upload-hint').style.display = 'none';
+  event.target.value = '';
+}
 
-반드시 아래 JSON 형식으로만 응답하세요. 마크다운 코드블록 없이 순수 JSON만:
+async function saveCharacter() {
+  const name = document.getElementById('char-name-input').value.trim();
+  const desc = document.getElementById('char-desc-input').value.trim();
+  if (!name) { showToast('이름을 입력해주세요'); return; }
+
+  const btn = document.getElementById('save-char-btn');
+  btn.disabled = true;
+  btn.textContent = '저장 중...';
+
+  let visualDescription = '';
+  if (appState.tempPhotoDataUrl && getOpenAIKey()) {
+    document.getElementById('vision-analyzing').classList.remove('hidden');
+    try {
+      visualDescription = await analyzeCharacterPhoto(appState.tempPhotoDataUrl);
+    } catch(e) {
+      console.error('Vision error:', e);
+    }
+    document.getElementById('vision-analyzing').classList.add('hidden');
+  }
+
+  const record = {
+    name,
+    description: desc,
+    photoDataUrl: appState.tempPhotoDataUrl || null,
+    visualDescription
+  };
+
+  try {
+    if (appState.editingCharacterId) {
+      record.id = appState.editingCharacterId;
+      await dbPut('characters', record);
+    } else {
+      await dbAdd('characters', record);
+    }
+    await loadCharacters();
+    renderCharList();
+    cancelCharForm();
+    showToast('저장됐어요 ✓');
+  } catch(e) {
+    showToast('저장 실패: ' + e.message);
+  }
+  btn.disabled = false;
+  btn.textContent = '저장';
+}
+
+async function deleteCharacter(id) {
+  if (!confirm('정말 삭제할까요?')) return;
+  await dbDelete('characters', id);
+  if (appState.selectedCharacter && appState.selectedCharacter.id === id) {
+    appState.selectedCharacter = null;
+  }
+  await loadCharacters();
+  renderCharList();
+}
+
+// ============================================================
+// STYLE REFS
+// ============================================================
+async function loadStyleRefs() {
+  appState.styleRefs = await dbGetAll('style_refs');
+}
+
+function renderStyleSlots() {
+  for (let slot = 0; slot < 3; slot++) {
+    const existing = appState.styleRefs.find(r => r.slot === slot);
+    const slotEl = document.getElementById(`style-slot-${slot}`);
+    const box = slotEl.querySelector('.style-slot-box');
+    if (existing && existing.imageDataUrl) {
+      box.innerHTML = `
+        <img src="${escHtml(existing.imageDataUrl)}" alt="style ${slot}">
+        <button class="style-remove" onclick="removeStyleSlot(${slot}, event)">✕</button>
+      `;
+      box.onclick = null;
+    } else {
+      box.innerHTML = `<div class="style-slot-empty"><span class="plus">＋</span>추가</div>`;
+      box.onclick = () => triggerStyleUpload(slot);
+    }
+  }
+}
+
+function triggerStyleUpload(slot) {
+  document.getElementById(`style-file-${slot}`).click();
+}
+
+async function handleStyleUpload(slot, event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const raw = await fileToDataUrl(file);
+  const resized = await resizeImage(raw, 512);
+
+  // Show analyzing overlay
+  const slotEl = document.getElementById(`style-slot-${slot}`);
+  const box = slotEl.querySelector('.style-slot-box');
+  box.innerHTML = `<img src="${escHtml(resized)}" alt="style ${slot}"><div class="style-analyzing"><span class="mini-spin" style="width:14px;height:14px;border:2px solid #eee;border-top-color:#ff6bae;border-radius:50%;animation:spin 0.7s linear infinite;display:inline-block;"></span> 분석중...</div>`;
+  box.onclick = null;
+
+  let styleDescription = '';
+  if (getOpenAIKey()) {
+    try {
+      styleDescription = await analyzeStyleRef(resized);
+    } catch(e) {
+      console.error('Style vision error:', e);
+    }
+  }
+
+  // Save to IndexedDB
+  const existing = appState.styleRefs.find(r => r.slot === slot);
+  const record = { slot, imageDataUrl: resized, styleDescription };
+  if (existing) {
+    record.id = existing.id;
+    await dbPut('style_refs', record);
+  } else {
+    await dbAdd('style_refs', record);
+  }
+  await loadStyleRefs();
+  renderStyleSlots();
+  event.target.value = '';
+}
+
+async function removeStyleSlot(slot, e) {
+  e.stopPropagation();
+  const existing = appState.styleRefs.find(r => r.slot === slot);
+  if (existing) {
+    await dbDelete('style_refs', existing.id);
+  }
+  await loadStyleRefs();
+  renderStyleSlots();
+}
+
+// ============================================================
+// MAIN INPUT
+// ============================================================
+function onSynopsisInput() {
+  appState.synopsis = document.getElementById('synopsis-input').value;
+  updateMakeBtn();
+}
+
+function updateMakeBtn() {
+  const btn = document.getElementById('make-btn');
+  btn.disabled = !(appState.selectedCharacter && appState.synopsis.trim());
+}
+
+// ============================================================
+// CLAUDE API - STORY GENERATION
+// ============================================================
+async function makeStory() {
+  if (!getAnthropicKey()) {
+    openSettings('api');
+    return;
+  }
+  if (!appState.selectedCharacter) { showToast('주인공을 선택해주세요'); return; }
+  if (!appState.synopsis.trim()) { showToast('이야기 개요를 입력해주세요'); return; }
+
+  setStep('loading');
+  const char = appState.selectedCharacter;
+
+  const systemPrompt = `당신은 아이들을 위한 따뜻하고 교훈적인 동화를 쓰는 작가입니다.
+다음 형식의 JSON으로만 응답하세요:
 {
   "title": "동화 제목",
   "pages": [
-    {"text": "1페이지 본문 (2~4문장)", "illustration": "삽화 설명 (한 문장, 영어로)"},
-    {"text": "2페이지 본문", "illustration": "삽화 설명 (영어로)"},
-    {"text": "3페이지 본문", "illustration": "삽화 설명 (영어로)"},
-    {"text": "4페이지 본문", "illustration": "삽화 설명 (영어로)"},
-    {"text": "5페이지 본문", "illustration": "삽화 설명 (영어로)"},
-    {"text": "6페이지 본문", "illustration": "삽화 설명 (영어로)"},
-    {"text": "7페이지 본문 (마무리)", "illustration": "삽화 설명 (영어로)"}
+    {
+      "text": "이 페이지의 이야기 내용 (2-4문장)",
+      "illustration": "illustration scene description in English"
+    }
   ]
 }
+페이지 수: 6-8페이지.
+삽화 설명은 반드시 영어로, 주인공 ${escHtml(char.name)}이 등장하는 장면으로 써주세요.
+제목과 텍스트는 한국어로 작성하세요.`;
 
-삽화 설명은 반드시 영어로 써주세요. DALL-E 이미지 생성 프롬프트로 사용됩니다.`;
-
-async function callClaude(userPrompt) {
-  const apiKey = getAnthropicKey();
-  if (!apiKey) throw new Error('ANTHROPIC_KEY_MISSING');
-
-  const resp = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-      "anthropic-dangerous-direct-browser-access": "true"
-    },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 2000,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: userPrompt }],
-    }),
-  });
-
-  if (!resp.ok) {
-    const err = await resp.json().catch(() => ({}));
-    if (resp.status === 401) throw new Error('API 키가 올바르지 않아요. 설정에서 확인해주세요.');
-    throw new Error(err.error?.message || `API 오류 (${resp.status})`);
-  }
-
-  const data = await resp.json();
-  const raw = data.content?.[0]?.text || "";
-  const clean = raw.replace(/```json|```/g, "").trim();
-  return JSON.parse(clean);
-}
-
-// ── DALL-E 3 Image generation ──────────────────────────
-async function generateDalleImage(illustrationDesc) {
-  const apiKey = getOpenAIKey();
-  if (!apiKey) throw new Error('OPENAI_KEY_MISSING');
-
-  const prompt = `Warm watercolor children's picture book illustration. ${illustrationDesc}. Style: soft pastel colors, gentle brushstrokes, cozy and dreamy atmosphere, cute friendly characters, suitable for 2-5 year old children's book. No text or letters in the image.`;
-
-  const resp = await fetch("https://api.openai.com/v1/images/generations", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`
-    },
-    body: JSON.stringify({
-      model: "dall-e-3",
-      prompt: prompt,
-      n: 1,
-      size: "1024x1024",
-      response_format: "b64_json"
-    })
-  });
-
-  if (!resp.ok) {
-    const err = await resp.json().catch(() => ({}));
-    if (resp.status === 401) throw new Error('OpenAI API 키가 올바르지 않아요.');
-    if (resp.status === 429) throw new Error('요청이 너무 많아요. 잠시 후 다시 시도해주세요.');
-    throw new Error(err.error?.message || `이미지 API 오류 (${resp.status})`);
-  }
-
-  const data = await resp.json();
-  return `data:image/png;base64,${data.data[0].b64_json}`;
-}
-
-// ── Story generation ───────────────────────────────────
-async function generateStory(isRevision) {
-  if (!getAnthropicKey()) {
-    showModal('동화 생성을 위해 Anthropic API Key를 먼저 입력해주세요.');
-    return;
-  }
-
-  clearError();
-  state.childName = inputName.value.trim();
-  state.synopsis  = inputSynop.value.trim();
-
-  $("loading-title").textContent = isRevision ? "동화를 다듬고 있어요..." : "동화를 쓰고 있어요...";
-  $("loading-sub").textContent   = `${state.childName}만을 위한 이야기를 만드는 중이에요 🌸`;
-  showStep("loading");
-
-  const userPrompt = isRevision
-    ? `아이 이름: ${state.childName}\n원래 줄거리 개요: ${state.synopsis}\n\n생성된 동화:\n${JSON.stringify(state.storyData, null, 2)}\n\n피드백: ${state.feedback}\n\n위 피드백을 반영해서 동화를 다시 써주세요.`
-    : `아이 이름: ${state.childName}\n줄거리 개요: ${state.synopsis}\n\n위 아이 이름과 개요를 바탕으로 동화를 만들어주세요.`;
+  const userPrompt = `등장인물 이름: ${char.name}
+등장인물 특징: ${char.description}
+이야기 개요: ${appState.synopsis}
+위 등장인물이 주인공인 동화를 만들어주세요.`;
 
   try {
-    const parsed = await callClaude(userPrompt);
-    state.storyData = parsed;
-    state.imagesGenerated = false;
-
-    $("story-title").textContent = parsed.title;
-    $("story-meta").textContent  = `${state.childName}를 위한 동화 • 7페이지`;
-    renderPages(parsed);
-
-    inputFeedback.value = "";
-    state.feedback = "";
-    updateReviseBtn();
-
-    btnFinish.disabled = false;
-    btnPDF.classList.add('hidden');
-    btnPDF.disabled = true;
-    $('img-progress-banner').classList.add('hidden');
-    feedbackSection.style.display = '';
-
-    showStep("review");
-  } catch (e) {
-    if (e.message === 'ANTHROPIC_KEY_MISSING') {
-      showModal('Anthropic API Key를 설정해주세요.');
-    } else {
-      showError(`오류가 발생했어요: ${e.message}`);
-    }
-    showStep("input");
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': getAnthropicKey(),
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4096,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
+    });
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error.message);
+    const raw = data.content[0].text;
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('JSON 파싱 실패');
+    appState.storyData = JSON.parse(match[0]);
+    appState.imagesGenerated = false;
+    setStep('review');
+    renderReview();
+  } catch(e) {
+    console.error(e);
+    setStep('input');
+    const errEl = document.getElementById('input-error');
+    errEl.textContent = '오류: ' + e.message;
+    errEl.classList.remove('hidden');
   }
 }
 
-// ── Image generation (on Finish) ───────────────────────
-async function handleFinish() {
+async function reviseStory() {
+  if (!getAnthropicKey()) { openSettings('api'); return; }
+  if (!appState.feedback.trim()) { showToast('수정 내용을 입력해주세요'); return; }
+
+  setStep('loading');
+  const char = appState.selectedCharacter;
+
+  const systemPrompt = `당신은 아이들을 위한 동화 작가입니다. 기존 동화를 수정 요청에 맞게 수정해주세요.
+동일한 JSON 형식으로만 응답하세요:
+{
+  "title": "동화 제목",
+  "pages": [{"text": "내용", "illustration": "English illustration description"}]
+}
+삽화 설명은 반드시 영어로, 주인공 ${char.name}이 등장하는 장면으로 써주세요.`;
+
+  const userPrompt = `기존 동화:
+${JSON.stringify(appState.storyData, null, 2)}
+
+수정 요청: ${appState.feedback}
+
+위 수정 요청을 반영해서 동화를 수정해주세요.`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': getAnthropicKey(),
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4096,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
+    });
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error.message);
+    const raw = data.content[0].text;
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('JSON 파싱 실패');
+    appState.storyData = JSON.parse(match[0]);
+    appState.imagesGenerated = false;
+    appState.feedback = '';
+    setStep('review');
+    renderReview();
+  } catch(e) {
+    console.error(e);
+    setStep('review');
+    showToast('수정 실패: ' + e.message);
+  }
+}
+
+// ============================================================
+// REVIEW RENDERING
+// ============================================================
+function setStep(step) {
+  appState.step = step;
+  document.getElementById('step-input').classList.toggle('hidden', step !== 'input');
+  document.getElementById('step-loading').classList.toggle('hidden', step !== 'loading');
+  document.getElementById('step-review').classList.toggle('hidden', step !== 'review');
+}
+
+function renderReview() {
+  const story = appState.storyData;
+  if (!story) return;
+  const char = appState.selectedCharacter;
+  document.getElementById('review-title').textContent = story.title || '';
+  document.getElementById('review-char-name').textContent = char ? `주인공: ${char.name}` : '';
+  document.getElementById('input-error').classList.add('hidden');
+  document.getElementById('progress-banner').classList.add('hidden');
+  document.getElementById('pdf-btn').classList.add('hidden');
+  document.getElementById('feedback-input').value = '';
+  appState.feedback = '';
+
+  const pagesList = document.getElementById('pages-list');
+  pagesList.innerHTML = story.pages.map((page, i) => {
+    const color = PAGE_COLORS[i % PAGE_COLORS.length];
+    const emoji = PAGE_EMOJIS[i % PAGE_EMOJIS.length];
+    return `<div class="page-card" id="page-card-${i}">
+      <div class="page-text-area" style="background:${color}; border-radius:20px 20px 0 0;">
+        <div class="page-num">PAGE ${i+1}</div>
+        <div class="page-text">${escHtml(page.text)}</div>
+        <div class="page-illus-label">삽화 설명</div>
+        <div class="page-illus-text">${escHtml(page.illustration)}</div>
+      </div>
+      <div class="page-img-area" id="page-img-${i}">
+        <div class="page-img-placeholder">
+          <span class="emoji">${emoji}</span>
+          <div style="font-size:12px">그림이 여기에 표시돼요</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// IMAGE GENERATION (DALL-E 3)
+// ============================================================
+async function finishStory() {
   if (!getOpenAIKey()) {
-    showModal('삽화 이미지 생성을 위해 OpenAI API Key를 입력해주세요.');
+    openSettings('api');
+    showToast('OpenAI API 키가 필요해요');
     return;
   }
+  const story = appState.storyData;
+  const char = appState.selectedCharacter;
+  if (!story || !char) return;
 
-  const pages = state.storyData.pages;
-  const total = pages.length;
+  const feedbackSection = document.getElementById('feedback-section');
+  feedbackSection.style.display = 'none';
 
-  // Lock UI
-  btnFinish.disabled = true;
-  btnRevise.disabled = true;
+  const total = story.pages.length;
+  let done = 0;
 
-  // Show progress banner
-  const banner = $('img-progress-banner');
+  const banner = document.getElementById('progress-banner');
   banner.classList.remove('hidden');
-  $('img-progress-text').textContent = `🎨 삽화를 그리고 있어요... (0 / ${total})`;
-  $('img-progress-bar').style.width = '0%';
+  updateProgress(done, total);
 
-  // Set all image slots to loading
+  // Show loading spinners on all pages
+  story.pages.forEach((_, i) => {
+    const imgArea = document.getElementById(`page-img-${i}`);
+    imgArea.innerHTML = `<div class="page-img-loading"><div class="mini-spinner"></div><div style="font-size:12px;color:#888">생성 중...</div></div>`;
+  });
+
+  // Build style prompt suffix
+  const styleRefs = appState.styleRefs.filter(r => r.styleDescription);
+  const styleStr = styleRefs.length > 0
+    ? `Illustration style: ${styleRefs.map(r => r.styleDescription).join(' ')} `
+    : 'Soft pastel colors, gentle watercolor brushstrokes, cozy dreamy atmosphere, cute friendly characters. ';
+
+  const charVisualDesc = char.visualDescription
+    ? `Main character ${char.name}: ${char.visualDescription}. `
+    : '';
+
   for (let i = 0; i < total; i++) {
-    setImageSlotLoading(i);
-  }
+    const page = story.pages[i];
+    const prompt = `Warm watercolor children's picture book illustration. ${charVisualDesc}Scene: ${page.illustration}. ${styleStr}No text or letters in image. Age 2-5 children's book.`;
 
-  let completed = 0;
-
-  for (let i = 0; i < total; i++) {
     try {
-      $('img-progress-text').textContent = `🎨 ${i + 1}번째 삽화를 그리고 있어요... (${i} / ${total})`;
+      const resp = await fetch('https://api.openai.com/v1/images/generations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${getOpenAIKey()}`
+        },
+        body: JSON.stringify({
+          model: 'dall-e-3',
+          prompt,
+          n: 1,
+          size: '1024x1024',
+          response_format: 'b64_json'
+        })
+      });
+      const data = await resp.json();
+      if (data.error) throw new Error(data.error.message);
+      const b64 = data.data[0].b64_json;
+      const dataUrl = `data:image/png;base64,${b64}`;
+      page.imageDataUrl = dataUrl;
 
-      const dataUrl = await generateDalleImage(pages[i].illustration);
-      state.storyData.pages[i].imageDataUrl = dataUrl;
-      setImageSlotDone(i, dataUrl);
-      completed++;
-    } catch (e) {
-      if (e.message === 'OPENAI_KEY_MISSING') {
-        // Abort and show modal
-        showModal('OpenAI API Key를 설정해주세요.');
-        btnFinish.disabled = false;
-        banner.classList.add('hidden');
-        for (let j = i; j < total; j++) {
-          const card = $(`illus-card-${j}`);
-          const slot = card?.querySelector('.img-slot');
-          if (slot) slot.innerHTML = '';
-        }
-        return;
-      }
-      setImageSlotError(i, e.message);
+      const imgArea = document.getElementById(`page-img-${i}`);
+      imgArea.innerHTML = `<img src="${escHtml(dataUrl)}" alt="page ${i+1} illustration">`;
+    } catch(e) {
+      console.error(`Image gen error page ${i}:`, e);
+      const imgArea = document.getElementById(`page-img-${i}`);
+      imgArea.innerHTML = `<div class="page-img-placeholder"><span class="emoji">⚠️</span><div style="font-size:12px;color:#e44">${escHtml(e.message)}</div></div>`;
     }
-
-    const pct = Math.round(((i + 1) / total) * 100);
-    $('img-progress-bar').style.width = `${pct}%`;
-    $('img-progress-text').textContent = `🎨 삽화를 그리고 있어요... (${i + 1} / ${total})`;
+    done++;
+    updateProgress(done, total);
   }
 
-  // Done
-  $('img-progress-text').textContent = `✨ 삽화 완성! (${completed}/${total}개 성공)`;
-  $('img-progress-bar').style.width = '100%';
+  appState.imagesGenerated = true;
+  banner.classList.add('hidden');
+  document.getElementById('pdf-btn').classList.remove('hidden');
+  feedbackSection.style.display = '';
 
-  state.imagesGenerated = true;
-  btnPDF.disabled = false;
-  btnPDF.classList.remove('hidden');
-  btnPDF.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  // Auto-save to library
+  await saveToLibrary();
+  showToast('라이브러리에 저장됐어요 📚');
 }
 
-// ── PDF generation ─────────────────────────────────────
+function updateProgress(done, total) {
+  const pct = total > 0 ? Math.round((done/total)*100) : 0;
+  document.getElementById('progress-text').textContent = `그림 생성 중... ${done}/${total}`;
+  document.getElementById('progress-bar').style.width = pct + '%';
+}
+
+// ============================================================
+// LIBRARY
+// ============================================================
+async function saveToLibrary() {
+  const story = appState.storyData;
+  const char = appState.selectedCharacter;
+  if (!story || !char) return;
+  const record = {
+    title: story.title,
+    characterName: char.name,
+    characterPhotoDataUrl: char.photoDataUrl || null,
+    synopsis: appState.synopsis,
+    pages: story.pages.map(p => ({ text: p.text, illustration: p.illustration, imageDataUrl: p.imageDataUrl || null })),
+    createdAt: Date.now()
+  };
+  const id = await dbAdd('library', record);
+  record.id = id;
+  appState.library.unshift(record);
+}
+
+async function loadLibrary() {
+  const all = await dbGetAll('library');
+  appState.library = all.sort((a,b) => b.createdAt - a.createdAt);
+}
+
+function showLibrary() {
+  appState.currentView = 'library';
+  document.getElementById('main-view').classList.add('hidden');
+  document.getElementById('library-view').classList.add('active');
+  renderLibrary();
+}
+
+function hideLibrary() {
+  appState.currentView = 'main';
+  document.getElementById('main-view').classList.remove('hidden');
+  document.getElementById('library-view').classList.remove('active');
+}
+
+function renderLibrary() {
+  const listEl = document.getElementById('library-list');
+  const lib = appState.library;
+  if (lib.length === 0) {
+    listEl.innerHTML = `<div class="library-empty">
+      <div class="emoji">📚</div>
+      <p>아직 저장된 동화가 없어요<br>동화를 완성하면 자동으로 저장돼요!</p>
+    </div>`;
+    return;
+  }
+  listEl.innerHTML = lib.map((story, idx) => {
+    const firstImg = story.pages && story.pages.find(p => p.imageDataUrl);
+    const thumb = firstImg
+      ? `<img class="library-thumb" src="${escHtml(firstImg.imageDataUrl)}" alt="thumb">`
+      : (story.characterPhotoDataUrl
+          ? `<img class="library-thumb" src="${escHtml(story.characterPhotoDataUrl)}" alt="char">`
+          : `<div class="library-thumb-emoji">📖</div>`);
+    return `<div class="library-card">
+      ${thumb}
+      <div class="library-info">
+        <div class="library-story-title">${escHtml(story.title)}</div>
+        <div class="library-meta">👤 ${escHtml(story.characterName)} · ${formatKoreanDate(story.createdAt)}</div>
+        <div class="library-actions">
+          <button style="background:#e8f4ff;color:#3b82f6;" onclick="downloadLibraryPDF(${idx})">📄 PDF 저장</button>
+          <button style="background:#fee;color:#e44;" onclick="deleteLibraryStory(${story.id})">🗑️ 삭제</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function deleteLibraryStory(id) {
+  if (!confirm('정말 삭제할까요?')) return;
+  await dbDelete('library', id);
+  await loadLibrary();
+  renderLibrary();
+}
+
+async function downloadLibraryPDF(idx) {
+  const story = appState.library[idx];
+  if (!story) return;
+  await generatePDF(story.title, story.characterName, story.characterPhotoDataUrl, story.pages);
+}
+
+// ============================================================
+// PDF GENERATION
+// ============================================================
 async function savePDF() {
-  btnPDF.disabled = true;
-  btnPDF.textContent = '📄 PDF 생성 중...';
+  const story = appState.storyData;
+  const char = appState.selectedCharacter;
+  if (!story) return;
+  await generatePDF(
+    story.title,
+    char ? char.name : '',
+    char ? char.photoDataUrl : null,
+    story.pages
+  );
+}
+
+async function generatePDF(title, characterName, characterPhotoDataUrl, pages) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: [420, 210] });
+  const renderEl = document.getElementById('pdf-render');
+
+  showToast('PDF 생성 중... 잠시만 기다려주세요', 5000);
 
   try {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    // Cover page
+    const coverDiv = document.createElement('div');
+    coverDiv.className = 'pdf-cover';
+    coverDiv.innerHTML = `
+      <div class="pdf-cover-left">
+        ${characterPhotoDataUrl
+          ? `<img class="pdf-cover-photo" src="${escHtml(characterPhotoDataUrl)}" alt="char">`
+          : `<div class="pdf-cover-emoji-big">👤</div>`}
+        <div class="pdf-cover-title">${escHtml(title)}</div>
+        <div class="pdf-cover-for">for ${escHtml(characterName)}</div>
+      </div>
+      <div class="pdf-cover-right">📖</div>
+    `;
+    renderEl.appendChild(coverDiv);
+    const coverCanvas = await html2canvas(coverDiv, { scale: 2, useCORS: true, allowTaint: true, width: 840, height: 420 });
+    renderEl.removeChild(coverDiv);
+    const coverImg = coverCanvas.toDataURL('image/jpeg', 0.92);
+    doc.addImage(coverImg, 'JPEG', 0, 0, 420, 210);
 
-    const pages = state.storyData.pages;
-    const title = state.storyData.title;
-    const childName = state.childName;
-
-    // Temp container for rendering
-    const container = document.createElement('div');
-    container.style.cssText = 'position:fixed;left:-9999px;top:0;pointer-events:none;z-index:-1;';
-    document.body.appendChild(container);
-
-    // ── Cover page ──
-    const coverEl = buildCoverEl(title, childName);
-    container.appendChild(coverEl);
-    await waitForFonts();
-    const coverCanvas = await html2canvas(coverEl, { scale: 2, useCORS: true, backgroundColor: null });
-    doc.addImage(coverCanvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 210, 297);
-
-    // ── Story pages ──
+    // Story pages
     for (let i = 0; i < pages.length; i++) {
-      doc.addPage();
-      container.innerHTML = '';
-      const pageEl = buildStoryPageEl(pages[i], i, childName);
-      container.appendChild(pageEl);
-      // Wait for images
-      if (pages[i].imageDataUrl) {
-        await new Promise(res => {
-          const img = pageEl.querySelector('img');
-          if (!img) return res();
-          if (img.complete) return res();
-          img.onload = res;
-          img.onerror = res;
-        });
-      }
-      const canvas = await html2canvas(pageEl, { scale: 2, useCORS: true, backgroundColor: null });
-      doc.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 210, 297);
+      const page = pages[i];
+      const bgColor = PDF_BG_COLORS[i % PDF_BG_COLORS.length];
 
-      btnPDF.textContent = `📄 PDF 생성 중... (${i + 1}/${pages.length})`;
+      doc.addPage();
+      const pageDiv = document.createElement('div');
+      pageDiv.className = 'pdf-page';
+      pageDiv.innerHTML = `
+        <div class="pdf-left" style="background:${bgColor};">
+          <div class="pdf-page-badge">${i+1}</div>
+          <div class="pdf-page-label">PAGE ${i+1}</div>
+          <div class="pdf-page-text">${escHtml(page.text)}</div>
+        </div>
+        <div class="pdf-right">
+          ${page.imageDataUrl
+            ? `<img src="${escHtml(page.imageDataUrl)}" alt="page">`
+            : `<div class="pdf-right-placeholder">${PAGE_EMOJIS[i % PAGE_EMOJIS.length]}</div>`}
+        </div>
+      `;
+      renderEl.appendChild(pageDiv);
+      const pageCanvas = await html2canvas(pageDiv, { scale: 2, useCORS: true, allowTaint: true, width: 840, height: 420 });
+      renderEl.removeChild(pageDiv);
+      const pageImg = pageCanvas.toDataURL('image/jpeg', 0.92);
+      doc.addImage(pageImg, 'JPEG', 0, 0, 420, 210);
     }
 
-    document.body.removeChild(container);
-
-    const safeTitle = title.replace(/[<>:"/\\|?*]/g, '_');
-    doc.save(`${childName}의_동화_${safeTitle}.pdf`);
-
-    btnPDF.textContent = '📄 PDF로 저장하기';
-    btnPDF.disabled = false;
-  } catch (e) {
-    btnPDF.textContent = '📄 PDF로 저장하기';
-    btnPDF.disabled = false;
-    alert(`PDF 생성 중 오류가 발생했어요: ${e.message}`);
+    const safeTitle = (title || '동화').replace(/[^\wㄱ-힣]/g, '_');
+    const safeChar = (characterName || '').replace(/[^\wㄱ-힣]/g, '_');
+    doc.save(`${safeChar}의_동화_${safeTitle}.pdf`);
+    showToast('PDF가 저장됐어요 📄');
+  } catch(e) {
+    console.error('PDF error:', e);
+    showToast('PDF 생성 실패: ' + e.message);
+    // Clean up any leftover render elements
+    renderEl.innerHTML = '';
   }
 }
 
-function waitForFonts() {
-  return document.fonts.ready;
+// ============================================================
+// INIT
+// ============================================================
+async function init() {
+  await openDB();
+  await loadCharacters();
+  await loadStyleRefs();
+  await loadLibrary();
+  updateApiStatusBadges();
+  setStep('input');
+  renderCharSelector();
+  updateMakeBtn();
 }
 
-function buildCoverEl(title, childName) {
-  const div = document.createElement('div');
-  div.style.cssText = `
-    width:595px; height:842px;
-    background: linear-gradient(145deg, #FFE4EF 0%, #EEE0FF 50%, #D8ECFF 100%);
-    display:flex; flex-direction:column;
-    align-items:center; justify-content:center;
-    font-family:'Nunito','Apple SD Gothic Neo',sans-serif;
-    position:relative; overflow:hidden;
-  `;
-
-  // Decorative circles
-  div.innerHTML = `
-    <div style="position:absolute;top:-60px;left:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,179,198,0.2);"></div>
-    <div style="position:absolute;bottom:-80px;right:-80px;width:280px;height:280px;border-radius:50%;background:rgba(196,160,212,0.15);"></div>
-    <div style="position:absolute;top:30px;right:40px;font-size:40px;opacity:0.3;">⭐</div>
-    <div style="position:absolute;bottom:80px;left:40px;font-size:32px;opacity:0.25;">🌙</div>
-    <div style="font-size:90px;margin-bottom:28px;filter:drop-shadow(0 8px 20px rgba(196,160,212,0.3));">📚</div>
-    <div style="
-      font-size:34px;font-weight:800;color:#4A3F5C;
-      text-align:center;line-height:1.4;
-      padding:0 56px;margin-bottom:20px;
-      font-family:'Nanum Myeongjo',Georgia,serif;
-      text-shadow:0 2px 8px rgba(196,160,212,0.3);
-    ">${title}</div>
-    <div style="
-      display:inline-block;
-      background:rgba(255,255,255,0.7);
-      border-radius:30px;padding:10px 24px;
-      font-size:16px;color:#9B8EAC;font-weight:700;
-      letter-spacing:0.02em;
-    ">✨ ${childName}를 위한 특별한 동화</div>
-    <div style="
-      position:absolute;bottom:32px;
-      font-size:13px;color:#BBA0CC;font-weight:600;
-      letter-spacing:0.05em;
-    ">지호의 동화책 메이커</div>
-  `;
-  return div;
-}
-
-const PDF_BG_COLORS = [
-  '#FFE8F0','#E8F4FF','#FFF3E0','#E8FFE8','#F3E8FF','#FFF8E0','#E0F8FF'
-];
-
-function buildStoryPageEl(page, index, childName) {
-  const bg = PDF_BG_COLORS[index % PDF_BG_COLORS.length];
-  const pageNum = index + 1;
-
-  const div = document.createElement('div');
-  div.style.cssText = `
-    width:595px; height:842px;
-    background:${bg};
-    display:flex; flex-direction:column;
-    position:relative; overflow:hidden;
-    font-family:'Nunito','Apple SD Gothic Neo',sans-serif;
-  `;
-
-  // Top image section (56% of height = ~472px)
-  const imgWrap = document.createElement('div');
-  imgWrap.style.cssText = `
-    width:100%; height:472px;
-    background:rgba(255,255,255,0.3);
-    display:flex;align-items:center;justify-content:center;
-    overflow:hidden; position:relative;
-  `;
-
-  if (page.imageDataUrl) {
-    const img = document.createElement('img');
-    img.src = page.imageDataUrl;
-    img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
-    imgWrap.appendChild(img);
-  } else {
-    imgWrap.innerHTML = `<div style="font-size:64px;opacity:0.25;">🎨</div>`;
-  }
-
-  // Bottom text section
-  const textWrap = document.createElement('div');
-  textWrap.style.cssText = `
-    flex:1;
-    padding:28px 52px 20px;
-    display:flex; flex-direction:column; justify-content:center;
-    background:rgba(255,255,255,0.55);
-    position:relative;
-  `;
-  textWrap.innerHTML = `
-    <div style="
-      font-size:11px;font-weight:700;
-      color:#C4A0B8;letter-spacing:0.12em;
-      text-transform:uppercase;margin-bottom:14px;
-    ">PAGE ${pageNum}</div>
-    <div style="
-      font-size:17px;line-height:2;
-      color:#4A3F5C;
-      font-family:'Nanum Myeongjo',Georgia,serif;
-    ">${page.text}</div>
-  `;
-
-  // Page number badge
-  const badge = document.createElement('div');
-  badge.style.cssText = `
-    position:absolute;top:14px;right:18px;
-    width:34px;height:34px;border-radius:50%;
-    background:rgba(255,255,255,0.8);
-    display:flex;align-items:center;justify-content:center;
-    font-size:14px;font-weight:800;color:#9B8EAC;
-    font-family:'Nunito',sans-serif;
-    box-shadow:0 2px 8px rgba(0,0,0,0.08);
-  `;
-  badge.textContent = pageNum;
-
-  // Decorative corner element
-  const corner = document.createElement('div');
-  corner.style.cssText = `
-    position:absolute;bottom:16px;right:20px;
-    font-size:20px;opacity:0.3;
-  `;
-  corner.textContent = PAGE_EMOJIS[index % PAGE_EMOJIS.length];
-
-  div.appendChild(imgWrap);
-  div.appendChild(textWrap);
-  div.appendChild(badge);
-  div.appendChild(corner);
-  return div;
-}
-
-// ── Event listeners ────────────────────────────────────
-inputName.addEventListener("input",  updateGenerateBtn);
-inputSynop.addEventListener("input", updateGenerateBtn);
-inputFeedback.addEventListener("input", () => {
-  state.feedback = inputFeedback.value;
-  updateReviseBtn();
-});
-
-btnGenerate.addEventListener("click", () => generateStory(false));
-btnRevise.addEventListener("click",   () => generateStory(true));
-btnFinish.addEventListener("click",   handleFinish);
-btnPDF.addEventListener("click",      savePDF);
-
-btnReset.addEventListener("click", () => {
-  inputName.value     = "";
-  inputSynop.value    = "";
-  inputFeedback.value = "";
-  state = { childName: "", synopsis: "", feedback: "", storyData: null, step: "input", imagesGenerated: false };
-  clearError();
-  updateGenerateBtn();
-  showStep("input");
-});
-
-// ── Init ───────────────────────────────────────────────
-(function init() {
-  if (!getAnthropicKey()) {
-    showModal();
-  }
-})();
+init().catch(console.error);
 </script>
 </body>
 </html>
