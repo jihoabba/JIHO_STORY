@@ -6,6 +6,8 @@
   <title>지호의 동화책 메이커</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -31,6 +33,10 @@
       from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: translateY(0); }
     }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
 
     #bg-stars {
       position: fixed;
@@ -48,10 +54,11 @@
       z-index: 1;
     }
 
-    /* HEADER */
+    /* ── HEADER ─────────────────────────────────── */
     .header {
       text-align: center;
       margin-bottom: 36px;
+      position: relative;
     }
     .header-emoji { font-size: 52px; margin-bottom: 8px; }
     .header h1 {
@@ -65,8 +72,88 @@
       font-size: 14px;
       color: #9B8EAC;
     }
+    .btn-settings {
+      position: absolute;
+      top: 4px; right: 0;
+      background: rgba(255,255,255,0.8);
+      border: 2px solid #F0E6FF;
+      border-radius: 50%;
+      width: 40px; height: 40px;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 10px rgba(180,160,200,0.2);
+    }
+    .btn-settings:hover { transform: rotate(30deg); box-shadow: 0 4px 16px rgba(180,160,200,0.3); }
 
-    /* CARDS */
+    /* ── MODAL ──────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(74, 63, 92, 0.4);
+      backdrop-filter: blur(6px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.2s ease;
+    }
+    .modal-card {
+      background: white;
+      border-radius: 28px;
+      padding: 32px 28px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 60px rgba(74,63,92,0.2);
+      animation: fadeIn 0.3s ease;
+    }
+    .modal-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .modal-header .modal-icon { font-size: 40px; margin-bottom: 10px; display: block; }
+    .modal-header h2 {
+      font-size: 20px;
+      font-weight: 800;
+      color: #4A3F5C;
+      margin-bottom: 6px;
+    }
+    .modal-header p {
+      font-size: 12px;
+      color: #9B8EAC;
+      line-height: 1.5;
+    }
+    .key-hint {
+      display: block;
+      font-size: 11px;
+      color: #BBA0CC;
+      margin-top: 5px;
+    }
+    .key-status {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-left: 6px;
+      font-weight: 600;
+    }
+    .key-status.set { background: #E0FFE8; color: #3A9E5C; }
+    .key-status.unset { background: #FFE8E8; color: #E05050; }
+    .btn-modal-close {
+      width: 100%;
+      margin-top: 8px;
+      padding: 10px;
+      background: transparent;
+      border: none;
+      font-size: 13px;
+      color: #BBA0CC;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+    }
+
+    /* ── CARDS ──────────────────────────────────── */
     .card {
       background: rgba(255,255,255,0.85);
       border-radius: 28px;
@@ -76,7 +163,7 @@
       animation: fadeIn 0.4s ease;
     }
 
-    /* FORM */
+    /* ── FORM ───────────────────────────────────── */
     .form-label {
       display: block;
       font-size: 13px;
@@ -101,13 +188,13 @@
       font-size: 14px;
       resize: none;
       line-height: 1.7;
-      rows: 4;
     }
     .form-input:focus, .form-textarea:focus { border-color: #C4A0D4; }
     .form-group { margin-bottom: 20px; }
     .form-group:last-of-type { margin-bottom: 24px; }
+    .required { color: #FF6B8A; }
 
-    /* BUTTONS */
+    /* ── BUTTONS ────────────────────────────────── */
     .btn-primary {
       width: 100%;
       padding: 16px;
@@ -164,7 +251,37 @@
       box-shadow: 0 4px 16px rgba(196,160,212,0.4);
       transition: transform 0.15s;
     }
-    .btn-finish:active { transform: scale(0.97); }
+    .btn-finish:disabled {
+      background: #E8E0EE;
+      color: #BBA0CC;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .btn-finish:active:not(:disabled) { transform: scale(0.97); }
+
+    .btn-pdf {
+      width: 100%;
+      margin-top: 12px;
+      padding: 16px;
+      background: linear-gradient(135deg, #A0D4FF 0%, #80B8FF 100%);
+      border: none;
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 800;
+      color: white;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      box-shadow: 0 4px 20px rgba(128,184,255,0.4);
+      transition: transform 0.15s, box-shadow 0.15s;
+      animation: fadeIn 0.5s ease;
+    }
+    .btn-pdf:disabled {
+      background: #E8E0EE;
+      color: #BBA0CC;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .btn-pdf:not(:disabled):active { transform: scale(0.97); }
 
     .btn-reset {
       width: 100%;
@@ -179,7 +296,7 @@
     }
     .btn-row { display: flex; gap: 10px; }
 
-    /* LOADING */
+    /* ── LOADING ────────────────────────────────── */
     .loading-card {
       background: rgba(255,255,255,0.85);
       border-radius: 28px;
@@ -216,7 +333,7 @@
     .dot:nth-child(2) { animation: bounce 1.2s ease-in-out 0.2s infinite; }
     .dot:nth-child(3) { animation: bounce 1.2s ease-in-out 0.4s infinite; }
 
-    /* STORY REVIEW */
+    /* ── STORY REVIEW ───────────────────────────── */
     .title-card {
       background: linear-gradient(135deg, #FFE8F5 0%, #E8E0FF 100%);
       border-radius: 28px;
@@ -288,7 +405,78 @@
       opacity: 0.75;
     }
 
-    /* FEEDBACK */
+    /* ── IMAGE SLOT ─────────────────────────────── */
+    .img-slot {
+      margin-top: 14px;
+      border-radius: 14px;
+      overflow: hidden;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .img-slot-loading {
+      background: rgba(255,255,255,0.6);
+      padding: 16px;
+      border-radius: 14px;
+      text-align: center;
+      width: 100%;
+    }
+    .img-slot-loading .spin-emoji {
+      font-size: 28px;
+      display: block;
+      animation: spin 2s linear infinite;
+      margin-bottom: 6px;
+    }
+    .img-slot-loading p {
+      font-size: 12px;
+      color: #9B8EAC;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    .img-slot img {
+      width: 100%;
+      border-radius: 14px;
+      display: block;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+    .img-slot-error {
+      background: #FFF0F0;
+      padding: 12px;
+      border-radius: 14px;
+      text-align: center;
+      font-size: 12px;
+      color: #FF6B8A;
+      width: 100%;
+    }
+
+    /* ── IMAGE PROGRESS BANNER ──────────────────── */
+    .img-progress-banner {
+      background: linear-gradient(135deg, #FFF3E0, #FFE0F5);
+      border-radius: 16px;
+      padding: 14px 18px;
+      margin-bottom: 14px;
+      text-align: center;
+      border: 2px solid rgba(255,255,255,0.8);
+      font-size: 13px;
+      font-weight: 700;
+      color: #7A5C8A;
+      animation: fadeIn 0.3s ease;
+    }
+    .img-progress-bar-wrap {
+      height: 6px;
+      background: rgba(255,255,255,0.7);
+      border-radius: 3px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    .img-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #FFB3C6, #C4A0D4);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    /* ── FEEDBACK ───────────────────────────────── */
     .feedback-card {
       background: rgba(255,255,255,0.9);
       border-radius: 24px;
@@ -321,7 +509,7 @@
     }
     .feedback-textarea:focus { border-color: #C4A0D4; outline: none; }
 
-    /* ERROR */
+    /* ── ERROR ──────────────────────────────────── */
     .error-msg {
       color: #FF6B8A;
       font-size: 13px;
@@ -329,7 +517,7 @@
       text-align: center;
     }
 
-    /* HIDDEN */
+    /* ── HIDDEN ─────────────────────────────────── */
     .hidden { display: none !important; }
   </style>
 </head>
@@ -356,6 +544,38 @@
   <circle cx="380" cy="230" r="1.5" fill="#FFD580" opacity="0.25"/>
 </svg>
 
+<!-- API Key Modal -->
+<div id="api-modal-overlay" class="modal-overlay hidden">
+  <div class="modal-card">
+    <div class="modal-header">
+      <span class="modal-icon">🔑</span>
+      <h2>API 키 설정</h2>
+      <p>API 키는 이 기기의 브라우저에만 저장되며<br>외부로 전송되지 않습니다.</p>
+    </div>
+    <div class="form-group">
+      <label class="form-label">
+        Anthropic API Key <span class="required">*</span>
+        <span id="anthropic-key-status" class="key-status unset">미설정</span>
+      </label>
+      <input id="modal-anthropic-key" class="form-input" type="password"
+        placeholder="sk-ant-api03-..." autocomplete="off" />
+      <small class="key-hint">Claude로 동화 텍스트를 생성합니다.</small>
+    </div>
+    <div class="form-group">
+      <label class="form-label">
+        OpenAI API Key
+        <span id="openai-key-status" class="key-status unset">미설정</span>
+      </label>
+      <input id="modal-openai-key" class="form-input" type="password"
+        placeholder="sk-proj-..." autocomplete="off" />
+      <small class="key-hint">DALL-E 3으로 삽화 이미지를 생성합니다. (완성하기 기능에 필요)</small>
+    </div>
+    <p id="modal-error" class="error-msg hidden"></p>
+    <button id="btn-save-keys" class="btn-primary">저장하기 ✓</button>
+    <button id="btn-close-modal" class="btn-modal-close">닫기</button>
+  </div>
+</div>
+
 <div id="app">
 
   <!-- HEADER -->
@@ -363,6 +583,7 @@
     <div class="header-emoji">📚</div>
     <h1>지호의 동화책 메이커</h1>
     <p>세상에 하나뿐인 우리 아이 맞춤 동화 ✨</p>
+    <button id="btn-settings" class="btn-settings" title="API 키 설정">⚙️</button>
   </div>
 
   <!-- STEP: INPUT -->
@@ -408,11 +629,19 @@
       <p id="story-meta"></p>
     </div>
 
+    <!-- Image generation progress (hidden until finish is clicked) -->
+    <div id="img-progress-banner" class="img-progress-banner hidden">
+      <span id="img-progress-text">🎨 삽화를 그리고 있어요...</span>
+      <div class="img-progress-bar-wrap">
+        <div id="img-progress-bar" class="img-progress-bar" style="width:0%"></div>
+      </div>
+    </div>
+
     <!-- Pages -->
     <div id="pages-list" class="pages-list"></div>
 
     <!-- Feedback -->
-    <div class="feedback-card">
+    <div id="feedback-section" class="feedback-card">
       <p class="feedback-label">💬 피드백 (선택)</p>
       <textarea id="feedback" class="feedback-textarea" rows="3"
         placeholder="예: 5페이지 내용을 좀 더 재미있게 바꿔줘&#10;예: 결말이 너무 짧아, 좀 더 따뜻하게 마무리해줘"></textarea>
@@ -420,6 +649,7 @@
         <button id="btn-revise" class="btn-revise" disabled>✏️ 수정하기</button>
         <button id="btn-finish" class="btn-finish">🎉 완성하기</button>
       </div>
+      <button id="btn-pdf" class="btn-pdf hidden" disabled>📄 PDF로 저장하기</button>
       <button id="btn-reset" class="btn-reset">← 처음부터 다시 만들기</button>
     </div>
   </div>
@@ -427,107 +657,219 @@
 </div>
 
 <script>
-  // ── State ──────────────────────────────────────────────
-  let state = {
-    childName: "",
-    synopsis: "",
-    feedback: "",
-    storyData: null,   // { title, pages: [{text, illustration}] }
-    step: "input",     // input | loading | review
-  };
+// ── State ──────────────────────────────────────────────
+let state = {
+  childName: "",
+  synopsis: "",
+  feedback: "",
+  storyData: null,   // { title, pages: [{text, illustration, imageDataUrl?}] }
+  step: "input",     // input | loading | review
+  imagesGenerated: false,
+};
 
-  // ── DOM refs ───────────────────────────────────────────
-  const $ = id => document.getElementById(id);
-  const stepInput   = $("step-input");
-  const stepLoading = $("step-loading");
-  const stepReview  = $("step-review");
-  const inputName   = $("child-name");
-  const inputSynop  = $("synopsis");
-  const inputFeedback = $("feedback");
-  const btnGenerate = $("btn-generate");
-  const btnRevise   = $("btn-revise");
-  const btnFinish   = $("btn-finish");
-  const btnReset    = $("btn-reset");
-  const errorMsg    = $("error-msg");
-  const pagesList   = $("pages-list");
+// ── DOM refs ───────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const stepInput    = $("step-input");
+const stepLoading  = $("step-loading");
+const stepReview   = $("step-review");
+const inputName    = $("child-name");
+const inputSynop   = $("synopsis");
+const inputFeedback = $("feedback");
+const btnGenerate  = $("btn-generate");
+const btnRevise    = $("btn-revise");
+const btnFinish    = $("btn-finish");
+const btnReset     = $("btn-reset");
+const btnPDF       = $("btn-pdf");
+const errorMsg     = $("error-msg");
+const pagesList    = $("pages-list");
+const feedbackSection = $("feedback-section");
 
-  // ── Page colors / emojis ───────────────────────────────
-  const PAGE_COLORS = ["#FFE8F0","#E8F4FF","#FFF3E0","#E8FFE8","#F3E8FF","#FFF8E0","#E0F8FF"];
-  const PAGE_EMOJIS = ["🌸","⭐","🌈","🍀","🌙","🌻","🦋"];
+// Page colors / emojis
+const PAGE_COLORS = ["#FFE8F0","#E8F4FF","#FFF3E0","#E8FFE8","#F3E8FF","#FFF8E0","#E0F8FF"];
+const PAGE_EMOJIS = ["🌸","⭐","🌈","🍀","🌙","🌻","🦋"];
 
-  // ── UI helpers ─────────────────────────────────────────
-  function showStep(name) {
-    stepInput.classList.toggle("hidden",   name !== "input");
-    stepLoading.classList.toggle("hidden", name !== "loading");
-    stepReview.classList.toggle("hidden",  name !== "review");
-    state.step = name;
+// ── Key management ─────────────────────────────────────
+function getAnthropicKey() { return localStorage.getItem('jiho_anthropic_key') || ''; }
+function getOpenAIKey()    { return localStorage.getItem('jiho_openai_key') || ''; }
+
+function saveKeys(aKey, oKey) {
+  if (aKey) localStorage.setItem('jiho_anthropic_key', aKey);
+  if (oKey) localStorage.setItem('jiho_openai_key', oKey);
+}
+
+function updateKeyStatusBadges() {
+  const aBadge = $('anthropic-key-status');
+  const oBadge = $('openai-key-status');
+  if (getAnthropicKey()) {
+    aBadge.textContent = '설정됨'; aBadge.className = 'key-status set';
+  } else {
+    aBadge.textContent = '미설정'; aBadge.className = 'key-status unset';
+  }
+  if (getOpenAIKey()) {
+    oBadge.textContent = '설정됨'; oBadge.className = 'key-status set';
+  } else {
+    oBadge.textContent = '미설정'; oBadge.className = 'key-status unset';
+  }
+}
+
+// ── Modal ──────────────────────────────────────────────
+function showModal(errorText) {
+  $('modal-anthropic-key').value = '';
+  $('modal-openai-key').value = '';
+  $('modal-error').classList.add('hidden');
+  if (errorText) {
+    $('modal-error').textContent = errorText;
+    $('modal-error').classList.remove('hidden');
+  }
+  updateKeyStatusBadges();
+  $('api-modal-overlay').classList.remove('hidden');
+}
+
+function hideModal() {
+  $('api-modal-overlay').classList.add('hidden');
+}
+
+$('btn-settings').addEventListener('click', () => showModal());
+$('btn-close-modal').addEventListener('click', hideModal);
+$('api-modal-overlay').addEventListener('click', e => {
+  if (e.target === $('api-modal-overlay')) hideModal();
+});
+
+$('btn-save-keys').addEventListener('click', () => {
+  const aKey = $('modal-anthropic-key').value.trim();
+  const oKey = $('modal-openai-key').value.trim();
+
+  if (!aKey && !getAnthropicKey()) {
+    $('modal-error').textContent = 'Anthropic API Key는 필수입니다.';
+    $('modal-error').classList.remove('hidden');
+    return;
+  }
+  saveKeys(aKey, oKey);
+  updateKeyStatusBadges();
+  hideModal();
+});
+
+// ── UI helpers ─────────────────────────────────────────
+function showStep(name) {
+  stepInput.classList.toggle("hidden",   name !== "input");
+  stepLoading.classList.toggle("hidden", name !== "loading");
+  stepReview.classList.toggle("hidden",  name !== "review");
+  state.step = name;
+}
+
+function showError(msg) {
+  errorMsg.textContent = msg;
+  errorMsg.classList.remove("hidden");
+}
+function clearError() {
+  errorMsg.textContent = "";
+  errorMsg.classList.add("hidden");
+}
+
+function updateGenerateBtn() {
+  btnGenerate.disabled = !(inputName.value.trim() && inputSynop.value.trim());
+}
+
+function updateReviseBtn() {
+  btnRevise.disabled = !inputFeedback.value.trim();
+}
+
+// ── Render pages ───────────────────────────────────────
+function renderPages(storyData) {
+  pagesList.innerHTML = "";
+  storyData.pages.forEach((page, i) => {
+    const textCard = makeTextCard(i, page.text);
+    pagesList.appendChild(textCard);
+
+    const illusCard = makeIllusCard(i, page.illustration, page.imageDataUrl);
+    pagesList.appendChild(illusCard);
+  });
+}
+
+function makeTextCard(i, text) {
+  const card = document.createElement("div");
+  card.className = "page-card";
+  card.style.background = PAGE_COLORS[i % PAGE_COLORS.length];
+
+  card.innerHTML = `
+    <div class="page-card-badge-emoji">${PAGE_EMOJIS[i % PAGE_EMOJIS.length]}</div>
+    <div class="page-card-label">📖 ${i + 1}페이지</div>
+    <p class="page-card-text">${escHtml(text)}</p>
+  `;
+  return card;
+}
+
+function makeIllusCard(i, illustration, imageDataUrl) {
+  const card = document.createElement("div");
+  card.className = "page-card";
+  card.id = `illus-card-${i}`;
+  card.style.background = PAGE_COLORS[i % PAGE_COLORS.length];
+
+  let imgSlotHtml = '';
+  if (imageDataUrl) {
+    imgSlotHtml = `<div class="img-slot"><img src="${imageDataUrl}" alt="삽화 ${i+1}" /></div>`;
   }
 
-  function showError(msg) {
-    errorMsg.textContent = msg;
-    errorMsg.classList.remove("hidden");
+  card.innerHTML = `
+    <div class="page-card-badge-emoji">🎨</div>
+    <div class="page-card-label">🎨 삽화 설명</div>
+    <p class="page-card-text illus">[삽화] ${escHtml(illustration)}</p>
+    ${imgSlotHtml}
+  `;
+  return card;
+}
+
+function setImageSlotLoading(i) {
+  const card = $(`illus-card-${i}`);
+  if (!card) return;
+  let slot = card.querySelector('.img-slot');
+  if (!slot) {
+    slot = document.createElement('div');
+    slot.className = 'img-slot';
+    card.appendChild(slot);
   }
-  function clearError() {
-    errorMsg.textContent = "";
-    errorMsg.classList.add("hidden");
+  slot.innerHTML = `
+    <div class="img-slot-loading">
+      <span class="spin-emoji">🎨</span>
+      <p>따뜻한 수채화 그림을 그리고 있어요...</p>
+    </div>
+  `;
+}
+
+function setImageSlotDone(i, dataUrl) {
+  const card = $(`illus-card-${i}`);
+  if (!card) return;
+  let slot = card.querySelector('.img-slot');
+  if (!slot) {
+    slot = document.createElement('div');
+    slot.className = 'img-slot';
+    card.appendChild(slot);
   }
+  const img = document.createElement('img');
+  img.src = dataUrl;
+  img.alt = `삽화 ${i + 1}`;
+  slot.innerHTML = '';
+  slot.appendChild(img);
+}
 
-  function updateGenerateBtn() {
-    btnGenerate.disabled = !(inputName.value.trim() && inputSynop.value.trim());
+function setImageSlotError(i, msg) {
+  const card = $(`illus-card-${i}`);
+  if (!card) return;
+  let slot = card.querySelector('.img-slot');
+  if (!slot) {
+    slot = document.createElement('div');
+    slot.className = 'img-slot';
+    card.appendChild(slot);
   }
+  slot.innerHTML = `<div class="img-slot-error">⚠️ 이미지 생성 실패: ${escHtml(msg)}</div>`;
+}
 
-  function updateReviseBtn() {
-    btnRevise.disabled = !inputFeedback.value.trim();
-  }
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
-  function renderPages(storyData) {
-    pagesList.innerHTML = "";
-    storyData.pages.forEach((page, i) => {
-      // Text card
-      const textCard = makePageCard(
-        `📖 ${i + 1}페이지`,
-        page.text,
-        i,
-        false
-      );
-      pagesList.appendChild(textCard);
-
-      // Illustration card
-      const illusCard = makePageCard(
-        "🎨 삽화 설명",
-        `[삽화] ${page.illustration}`,
-        i,
-        true
-      );
-      pagesList.appendChild(illusCard);
-    });
-  }
-
-  function makePageCard(label, text, colorIdx, isIllus) {
-    const card = document.createElement("div");
-    card.className = "page-card";
-    card.style.background = PAGE_COLORS[colorIdx % PAGE_COLORS.length];
-
-    const badge = document.createElement("div");
-    badge.className = "page-card-badge-emoji";
-    badge.textContent = PAGE_EMOJIS[colorIdx % PAGE_EMOJIS.length];
-
-    const labelEl = document.createElement("div");
-    labelEl.className = "page-card-label";
-    labelEl.textContent = label;
-
-    const textEl = document.createElement("p");
-    textEl.className = "page-card-text" + (isIllus ? " illus" : "");
-    textEl.textContent = text;
-
-    card.appendChild(badge);
-    card.appendChild(labelEl);
-    card.appendChild(textEl);
-    return card;
-  }
-
-  // ── API call ───────────────────────────────────────────
-  const SYSTEM_PROMPT = `당신은 어린이 동화 작가입니다. '추피' 시리즈처럼 2~5세 아이를 위한 따뜻하고 일상적인 동화를 씁니다.
+// ── Claude API ─────────────────────────────────────────
+const SYSTEM_PROMPT = `당신은 어린이 동화 작가입니다. '추피' 시리즈처럼 2~5세 아이를 위한 따뜻하고 일상적인 동화를 씁니다.
 
 스타일 가이드:
 - 일상적인 소재(밥 먹기, 잠자기, 친구 사귀기 등)를 친근하게 표현
@@ -540,88 +882,418 @@
 {
   "title": "동화 제목",
   "pages": [
-    {"text": "1페이지 본문 (2~4문장)", "illustration": "삽화 설명 (한 문장)"},
-    {"text": "2페이지 본문", "illustration": "삽화 설명"},
-    {"text": "3페이지 본문", "illustration": "삽화 설명"},
-    {"text": "4페이지 본문", "illustration": "삽화 설명"},
-    {"text": "5페이지 본문", "illustration": "삽화 설명"},
-    {"text": "6페이지 본문", "illustration": "삽화 설명"},
-    {"text": "7페이지 본문 (마무리)", "illustration": "삽화 설명"}
+    {"text": "1페이지 본문 (2~4문장)", "illustration": "삽화 설명 (한 문장, 영어로)"},
+    {"text": "2페이지 본문", "illustration": "삽화 설명 (영어로)"},
+    {"text": "3페이지 본문", "illustration": "삽화 설명 (영어로)"},
+    {"text": "4페이지 본문", "illustration": "삽화 설명 (영어로)"},
+    {"text": "5페이지 본문", "illustration": "삽화 설명 (영어로)"},
+    {"text": "6페이지 본문", "illustration": "삽화 설명 (영어로)"},
+    {"text": "7페이지 본문 (마무리)", "illustration": "삽화 설명 (영어로)"}
   ]
-}`;
+}
 
-  async function callClaude(userPrompt) {
-    const resp = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 2000,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: "user", content: userPrompt }],
-      }),
-    });
-    const data = await resp.json();
-    const raw = data.content?.[0]?.text || "";
-    const clean = raw.replace(/```json|```/g, "").trim();
-    return JSON.parse(clean);
-  }
+삽화 설명은 반드시 영어로 써주세요. DALL-E 이미지 생성 프롬프트로 사용됩니다.`;
 
-  async function generateStory(isRevision) {
-    clearError();
-    state.childName = inputName.value.trim();
-    state.synopsis  = inputSynop.value.trim();
+async function callClaude(userPrompt) {
+  const apiKey = getAnthropicKey();
+  if (!apiKey) throw new Error('ANTHROPIC_KEY_MISSING');
 
-    $("loading-title").textContent = isRevision ? "동화를 다듬고 있어요..." : "동화를 쓰고 있어요...";
-    $("loading-sub").textContent   = `${state.childName}만을 위한 이야기를 만드는 중이에요 🌸`;
-    showStep("loading");
-
-    const userPrompt = isRevision
-      ? `아이 이름: ${state.childName}\n원래 줄거리 개요: ${state.synopsis}\n\n생성된 동화:\n${JSON.stringify(state.storyData, null, 2)}\n\n피드백: ${state.feedback}\n\n위 피드백을 반영해서 동화를 다시 써주세요.`
-      : `아이 이름: ${state.childName}\n줄거리 개요: ${state.synopsis}\n\n위 아이 이름과 개요를 바탕으로 동화를 만들어주세요.`;
-
-    try {
-      const parsed = await callClaude(userPrompt);
-      state.storyData = parsed;
-
-      $("story-title").textContent = parsed.title;
-      $("story-meta").textContent  = `${state.childName}를 위한 동화 • 7페이지`;
-      renderPages(parsed);
-
-      inputFeedback.value = "";
-      state.feedback = "";
-      updateReviseBtn();
-      showStep("review");
-    } catch (e) {
-      showError("동화 생성 중 오류가 발생했어요. 다시 시도해주세요.");
-      showStep("input");
-    }
-  }
-
-  // ── Event listeners ────────────────────────────────────
-  inputName.addEventListener("input",  updateGenerateBtn);
-  inputSynop.addEventListener("input", updateGenerateBtn);
-  inputFeedback.addEventListener("input", () => {
-    state.feedback = inputFeedback.value;
-    updateReviseBtn();
+  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 2000,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: "user", content: userPrompt }],
+    }),
   });
 
-  btnGenerate.addEventListener("click", () => generateStory(false));
-  btnRevise.addEventListener("click",   () => generateStory(true));
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    if (resp.status === 401) throw new Error('API 키가 올바르지 않아요. 설정에서 확인해주세요.');
+    throw new Error(err.error?.message || `API 오류 (${resp.status})`);
+  }
 
-  btnFinish.addEventListener("click", () => {
-    alert(`"${state.storyData?.title}" 동화가 완성되었어요! 🎉\nPDF 저장 기능은 곧 추가될 예정이에요.`);
+  const data = await resp.json();
+  const raw = data.content?.[0]?.text || "";
+  const clean = raw.replace(/```json|```/g, "").trim();
+  return JSON.parse(clean);
+}
+
+// ── DALL-E 3 Image generation ──────────────────────────
+async function generateDalleImage(illustrationDesc) {
+  const apiKey = getOpenAIKey();
+  if (!apiKey) throw new Error('OPENAI_KEY_MISSING');
+
+  const prompt = `Warm watercolor children's picture book illustration. ${illustrationDesc}. Style: soft pastel colors, gentle brushstrokes, cozy and dreamy atmosphere, cute friendly characters, suitable for 2-5 year old children's book. No text or letters in the image.`;
+
+  const resp = await fetch("https://api.openai.com/v1/images/generations", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: "dall-e-3",
+      prompt: prompt,
+      n: 1,
+      size: "1024x1024",
+      response_format: "b64_json"
+    })
   });
 
-  btnReset.addEventListener("click", () => {
-    inputName.value    = "";
-    inputSynop.value   = "";
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    if (resp.status === 401) throw new Error('OpenAI API 키가 올바르지 않아요.');
+    if (resp.status === 429) throw new Error('요청이 너무 많아요. 잠시 후 다시 시도해주세요.');
+    throw new Error(err.error?.message || `이미지 API 오류 (${resp.status})`);
+  }
+
+  const data = await resp.json();
+  return `data:image/png;base64,${data.data[0].b64_json}`;
+}
+
+// ── Story generation ───────────────────────────────────
+async function generateStory(isRevision) {
+  if (!getAnthropicKey()) {
+    showModal('동화 생성을 위해 Anthropic API Key를 먼저 입력해주세요.');
+    return;
+  }
+
+  clearError();
+  state.childName = inputName.value.trim();
+  state.synopsis  = inputSynop.value.trim();
+
+  $("loading-title").textContent = isRevision ? "동화를 다듬고 있어요..." : "동화를 쓰고 있어요...";
+  $("loading-sub").textContent   = `${state.childName}만을 위한 이야기를 만드는 중이에요 🌸`;
+  showStep("loading");
+
+  const userPrompt = isRevision
+    ? `아이 이름: ${state.childName}\n원래 줄거리 개요: ${state.synopsis}\n\n생성된 동화:\n${JSON.stringify(state.storyData, null, 2)}\n\n피드백: ${state.feedback}\n\n위 피드백을 반영해서 동화를 다시 써주세요.`
+    : `아이 이름: ${state.childName}\n줄거리 개요: ${state.synopsis}\n\n위 아이 이름과 개요를 바탕으로 동화를 만들어주세요.`;
+
+  try {
+    const parsed = await callClaude(userPrompt);
+    state.storyData = parsed;
+    state.imagesGenerated = false;
+
+    $("story-title").textContent = parsed.title;
+    $("story-meta").textContent  = `${state.childName}를 위한 동화 • 7페이지`;
+    renderPages(parsed);
+
     inputFeedback.value = "";
-    state = { childName: "", synopsis: "", feedback: "", storyData: null, step: "input" };
-    clearError();
-    updateGenerateBtn();
+    state.feedback = "";
+    updateReviseBtn();
+
+    btnFinish.disabled = false;
+    btnPDF.classList.add('hidden');
+    btnPDF.disabled = true;
+    $('img-progress-banner').classList.add('hidden');
+    feedbackSection.style.display = '';
+
+    showStep("review");
+  } catch (e) {
+    if (e.message === 'ANTHROPIC_KEY_MISSING') {
+      showModal('Anthropic API Key를 설정해주세요.');
+    } else {
+      showError(`오류가 발생했어요: ${e.message}`);
+    }
     showStep("input");
-  });
+  }
+}
+
+// ── Image generation (on Finish) ───────────────────────
+async function handleFinish() {
+  if (!getOpenAIKey()) {
+    showModal('삽화 이미지 생성을 위해 OpenAI API Key를 입력해주세요.');
+    return;
+  }
+
+  const pages = state.storyData.pages;
+  const total = pages.length;
+
+  // Lock UI
+  btnFinish.disabled = true;
+  btnRevise.disabled = true;
+
+  // Show progress banner
+  const banner = $('img-progress-banner');
+  banner.classList.remove('hidden');
+  $('img-progress-text').textContent = `🎨 삽화를 그리고 있어요... (0 / ${total})`;
+  $('img-progress-bar').style.width = '0%';
+
+  // Set all image slots to loading
+  for (let i = 0; i < total; i++) {
+    setImageSlotLoading(i);
+  }
+
+  let completed = 0;
+
+  for (let i = 0; i < total; i++) {
+    try {
+      $('img-progress-text').textContent = `🎨 ${i + 1}번째 삽화를 그리고 있어요... (${i} / ${total})`;
+
+      const dataUrl = await generateDalleImage(pages[i].illustration);
+      state.storyData.pages[i].imageDataUrl = dataUrl;
+      setImageSlotDone(i, dataUrl);
+      completed++;
+    } catch (e) {
+      if (e.message === 'OPENAI_KEY_MISSING') {
+        // Abort and show modal
+        showModal('OpenAI API Key를 설정해주세요.');
+        btnFinish.disabled = false;
+        banner.classList.add('hidden');
+        for (let j = i; j < total; j++) {
+          const card = $(`illus-card-${j}`);
+          const slot = card?.querySelector('.img-slot');
+          if (slot) slot.innerHTML = '';
+        }
+        return;
+      }
+      setImageSlotError(i, e.message);
+    }
+
+    const pct = Math.round(((i + 1) / total) * 100);
+    $('img-progress-bar').style.width = `${pct}%`;
+    $('img-progress-text').textContent = `🎨 삽화를 그리고 있어요... (${i + 1} / ${total})`;
+  }
+
+  // Done
+  $('img-progress-text').textContent = `✨ 삽화 완성! (${completed}/${total}개 성공)`;
+  $('img-progress-bar').style.width = '100%';
+
+  state.imagesGenerated = true;
+  btnPDF.disabled = false;
+  btnPDF.classList.remove('hidden');
+  btnPDF.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ── PDF generation ─────────────────────────────────────
+async function savePDF() {
+  btnPDF.disabled = true;
+  btnPDF.textContent = '📄 PDF 생성 중...';
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    const pages = state.storyData.pages;
+    const title = state.storyData.title;
+    const childName = state.childName;
+
+    // Temp container for rendering
+    const container = document.createElement('div');
+    container.style.cssText = 'position:fixed;left:-9999px;top:0;pointer-events:none;z-index:-1;';
+    document.body.appendChild(container);
+
+    // ── Cover page ──
+    const coverEl = buildCoverEl(title, childName);
+    container.appendChild(coverEl);
+    await waitForFonts();
+    const coverCanvas = await html2canvas(coverEl, { scale: 2, useCORS: true, backgroundColor: null });
+    doc.addImage(coverCanvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 210, 297);
+
+    // ── Story pages ──
+    for (let i = 0; i < pages.length; i++) {
+      doc.addPage();
+      container.innerHTML = '';
+      const pageEl = buildStoryPageEl(pages[i], i, childName);
+      container.appendChild(pageEl);
+      // Wait for images
+      if (pages[i].imageDataUrl) {
+        await new Promise(res => {
+          const img = pageEl.querySelector('img');
+          if (!img) return res();
+          if (img.complete) return res();
+          img.onload = res;
+          img.onerror = res;
+        });
+      }
+      const canvas = await html2canvas(pageEl, { scale: 2, useCORS: true, backgroundColor: null });
+      doc.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 210, 297);
+
+      btnPDF.textContent = `📄 PDF 생성 중... (${i + 1}/${pages.length})`;
+    }
+
+    document.body.removeChild(container);
+
+    const safeTitle = title.replace(/[<>:"/\\|?*]/g, '_');
+    doc.save(`${childName}의_동화_${safeTitle}.pdf`);
+
+    btnPDF.textContent = '📄 PDF로 저장하기';
+    btnPDF.disabled = false;
+  } catch (e) {
+    btnPDF.textContent = '📄 PDF로 저장하기';
+    btnPDF.disabled = false;
+    alert(`PDF 생성 중 오류가 발생했어요: ${e.message}`);
+  }
+}
+
+function waitForFonts() {
+  return document.fonts.ready;
+}
+
+function buildCoverEl(title, childName) {
+  const div = document.createElement('div');
+  div.style.cssText = `
+    width:595px; height:842px;
+    background: linear-gradient(145deg, #FFE4EF 0%, #EEE0FF 50%, #D8ECFF 100%);
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    font-family:'Nunito','Apple SD Gothic Neo',sans-serif;
+    position:relative; overflow:hidden;
+  `;
+
+  // Decorative circles
+  div.innerHTML = `
+    <div style="position:absolute;top:-60px;left:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,179,198,0.2);"></div>
+    <div style="position:absolute;bottom:-80px;right:-80px;width:280px;height:280px;border-radius:50%;background:rgba(196,160,212,0.15);"></div>
+    <div style="position:absolute;top:30px;right:40px;font-size:40px;opacity:0.3;">⭐</div>
+    <div style="position:absolute;bottom:80px;left:40px;font-size:32px;opacity:0.25;">🌙</div>
+    <div style="font-size:90px;margin-bottom:28px;filter:drop-shadow(0 8px 20px rgba(196,160,212,0.3));">📚</div>
+    <div style="
+      font-size:34px;font-weight:800;color:#4A3F5C;
+      text-align:center;line-height:1.4;
+      padding:0 56px;margin-bottom:20px;
+      font-family:'Nanum Myeongjo',Georgia,serif;
+      text-shadow:0 2px 8px rgba(196,160,212,0.3);
+    ">${title}</div>
+    <div style="
+      display:inline-block;
+      background:rgba(255,255,255,0.7);
+      border-radius:30px;padding:10px 24px;
+      font-size:16px;color:#9B8EAC;font-weight:700;
+      letter-spacing:0.02em;
+    ">✨ ${childName}를 위한 특별한 동화</div>
+    <div style="
+      position:absolute;bottom:32px;
+      font-size:13px;color:#BBA0CC;font-weight:600;
+      letter-spacing:0.05em;
+    ">지호의 동화책 메이커</div>
+  `;
+  return div;
+}
+
+const PDF_BG_COLORS = [
+  '#FFE8F0','#E8F4FF','#FFF3E0','#E8FFE8','#F3E8FF','#FFF8E0','#E0F8FF'
+];
+
+function buildStoryPageEl(page, index, childName) {
+  const bg = PDF_BG_COLORS[index % PDF_BG_COLORS.length];
+  const pageNum = index + 1;
+
+  const div = document.createElement('div');
+  div.style.cssText = `
+    width:595px; height:842px;
+    background:${bg};
+    display:flex; flex-direction:column;
+    position:relative; overflow:hidden;
+    font-family:'Nunito','Apple SD Gothic Neo',sans-serif;
+  `;
+
+  // Top image section (56% of height = ~472px)
+  const imgWrap = document.createElement('div');
+  imgWrap.style.cssText = `
+    width:100%; height:472px;
+    background:rgba(255,255,255,0.3);
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden; position:relative;
+  `;
+
+  if (page.imageDataUrl) {
+    const img = document.createElement('img');
+    img.src = page.imageDataUrl;
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+    imgWrap.appendChild(img);
+  } else {
+    imgWrap.innerHTML = `<div style="font-size:64px;opacity:0.25;">🎨</div>`;
+  }
+
+  // Bottom text section
+  const textWrap = document.createElement('div');
+  textWrap.style.cssText = `
+    flex:1;
+    padding:28px 52px 20px;
+    display:flex; flex-direction:column; justify-content:center;
+    background:rgba(255,255,255,0.55);
+    position:relative;
+  `;
+  textWrap.innerHTML = `
+    <div style="
+      font-size:11px;font-weight:700;
+      color:#C4A0B8;letter-spacing:0.12em;
+      text-transform:uppercase;margin-bottom:14px;
+    ">PAGE ${pageNum}</div>
+    <div style="
+      font-size:17px;line-height:2;
+      color:#4A3F5C;
+      font-family:'Nanum Myeongjo',Georgia,serif;
+    ">${page.text}</div>
+  `;
+
+  // Page number badge
+  const badge = document.createElement('div');
+  badge.style.cssText = `
+    position:absolute;top:14px;right:18px;
+    width:34px;height:34px;border-radius:50%;
+    background:rgba(255,255,255,0.8);
+    display:flex;align-items:center;justify-content:center;
+    font-size:14px;font-weight:800;color:#9B8EAC;
+    font-family:'Nunito',sans-serif;
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+  `;
+  badge.textContent = pageNum;
+
+  // Decorative corner element
+  const corner = document.createElement('div');
+  corner.style.cssText = `
+    position:absolute;bottom:16px;right:20px;
+    font-size:20px;opacity:0.3;
+  `;
+  corner.textContent = PAGE_EMOJIS[index % PAGE_EMOJIS.length];
+
+  div.appendChild(imgWrap);
+  div.appendChild(textWrap);
+  div.appendChild(badge);
+  div.appendChild(corner);
+  return div;
+}
+
+// ── Event listeners ────────────────────────────────────
+inputName.addEventListener("input",  updateGenerateBtn);
+inputSynop.addEventListener("input", updateGenerateBtn);
+inputFeedback.addEventListener("input", () => {
+  state.feedback = inputFeedback.value;
+  updateReviseBtn();
+});
+
+btnGenerate.addEventListener("click", () => generateStory(false));
+btnRevise.addEventListener("click",   () => generateStory(true));
+btnFinish.addEventListener("click",   handleFinish);
+btnPDF.addEventListener("click",      savePDF);
+
+btnReset.addEventListener("click", () => {
+  inputName.value     = "";
+  inputSynop.value    = "";
+  inputFeedback.value = "";
+  state = { childName: "", synopsis: "", feedback: "", storyData: null, step: "input", imagesGenerated: false };
+  clearError();
+  updateGenerateBtn();
+  showStep("input");
+});
+
+// ── Init ───────────────────────────────────────────────
+(function init() {
+  if (!getAnthropicKey()) {
+    showModal();
+  }
+})();
 </script>
 </body>
 </html>
