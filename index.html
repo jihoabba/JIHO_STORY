@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280">
+<title>오키나와 6박 7일 가족여행 2025</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --accent: #4fc3f7;
+    --accent2: #ff9800;
+    --muted: rgba(255,255,255,0.55);
+    --card: rgba(255,255,255,0.06);
+    --border: rgba(255,255,255,0.1);
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: #000;
+    font-family: 'Noto Sans KR', -apple-system, sans-serif;
+    overflow: hidden;
+    color: #f5f5f7;
+  }
+
+  body { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+
+  #deck-wrapper { transform-origin: center center; }
+
+  #deck {
+    width: 1280px; height: 720px;
+    position: relative;
+    overflow: hidden;
+    background: #0a0a0a;
+  }
+
+  .slide {
+    position: absolute; inset: 0;
+    width: 1280px; height: 720px;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    text-align: center;
+    padding: 52px 72px;
+    opacity: 0;
+    transform: translateX(50px);
+    transition: opacity 0.5s cubic-bezier(.4,0,.2,1), transform 0.5s cubic-bezier(.4,0,.2,1);
+    pointer-events: none;
+    background: #0a0a0a;
+  }
+  .slide.active { opacity: 1; transform: translateX(0); pointer-events: all; }
+  .slide.exit   { opacity: 0; transform: translateX(-50px); }
+
+  .bg-img {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    z-index: 0;
+  }
+  .bg-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.52) 0%, rgba(0,0,0,0.76) 100%);
+    z-index: 1;
+  }
+  .slide > * { position: relative; z-index: 2; }
+
+  /* ── Type ── */
+  .eyebrow {
+    font-size: 12px; font-weight: 400; letter-spacing: 3.5px;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 14px;
+  }
+  h1 { font-size: 60px; font-weight: 900; line-height: 1.1; letter-spacing: -1.5px; margin-bottom: 16px; }
+  h1.lg { font-size: 70px; }
+  h1.sm { font-size: 44px; }
+  h1.xs { font-size: 36px; }
+  .sub { font-size: 22px; font-weight: 300; opacity: 0.7; line-height: 1.55; margin-bottom: 28px; max-width: 720px; }
+  .sub.sm { font-size: 18px; }
+  .date-badge {
+    display: inline-block; padding: 7px 20px; border-radius: 999px;
+    border: 1px solid var(--border); font-size: 14px; font-weight: 300; letter-spacing: 1px; color: var(--muted);
+  }
+  .divider { width: 40px; height: 2px; background: var(--accent); margin: 12px auto; opacity: 0.7; }
+
+  /* ── Cards ── */
+  .card-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 14px; width: 100%; margin-top: 14px;
+  }
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px 20px; text-align: left;
+  }
+  .card .day-num { font-size: 10px; font-weight: 400; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 5px; }
+  .card .day-title { font-size: 16px; font-weight: 700; margin-bottom: 5px; line-height: 1.3; }
+  .card .day-desc { font-size: 12px; font-weight: 300; color: var(--muted); line-height: 1.5; }
+
+  /* ── Timeline ── */
+  .timeline { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 820px; margin-top: 6px; }
+  .tl-row {
+    display: flex; align-items: flex-start; gap: 14px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 11px 16px; text-align: left;
+    cursor: pointer; transition: background 0.2s, border-color 0.2s;
+  }
+  .tl-row:hover { background: rgba(79,195,247,0.1); border-color: rgba(79,195,247,0.35); }
+  .tl-row a { text-decoration: none; color: inherit; display: flex; align-items: flex-start; gap: 14px; width: 100%; }
+  .tl-time { font-size: 12px; font-weight: 700; color: var(--accent); white-space: nowrap; min-width: 46px; padding-top: 2px; }
+  .tl-icon { font-size: 18px; flex-shrink: 0; }
+  .tl-title { font-size: 15px; font-weight: 700; margin-bottom: 1px; }
+  .tl-desc { font-size: 12px; font-weight: 300; color: var(--muted); line-height: 1.4; }
+  .map-badge {
+    margin-left: auto; padding: 2px 8px; border-radius: 999px;
+    background: rgba(79,195,247,0.15); border: 1px solid rgba(79,195,247,0.3);
+    font-size: 10px; color: var(--accent); white-space: nowrap; flex-shrink: 0; align-self: center;
+  }
+
+  /* ── Split ── */
+  .split {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 20px; width: 100%; max-width: 1120px; align-items: start; text-align: left;
+  }
+
+  /* ── Image card ── */
+  .img-card { border-radius: 16px; overflow: hidden; position: relative; }
+  .img-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .img-card .caption {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.78));
+    padding: 22px 14px 12px; font-size: 13px; font-weight: 400; color: rgba(255,255,255,0.88);
+  }
+
+  /* ── Photo strip ── */
+  .photo-strip { display: flex; gap: 10px; width: 100%; margin-top: 10px; }
+  .photo-strip .ps-item {
+    flex: 1; border-radius: 12px; overflow: hidden; position: relative;
+    cursor: pointer; transition: transform 0.2s;
+  }
+  .photo-strip .ps-item:hover { transform: scale(1.02); }
+  .photo-strip .ps-item img { width: 100%; height: 140px; object-fit: cover; display: block; }
+  .photo-strip .ps-item a { display: block; }
+  .photo-strip .ps-label {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: rgba(0,0,0,0.62); padding: 6px 10px;
+    font-size: 11px; font-weight: 700; color: #fff;
+  }
+
+  /* ── Tags ── */
+  .tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+  .tag { padding: 5px 14px; border-radius: 999px; background: rgba(79,195,247,0.12); border: 1px solid rgba(79,195,247,0.3); font-size: 12px; color: var(--accent); }
+  .tag.orange { background: rgba(255,152,0,0.12); border-color: rgba(255,152,0,0.3); color: var(--accent2); }
+
+  /* ── Tip ── */
+  .tip-box {
+    background: rgba(79,195,247,0.07); border: 1px solid rgba(79,195,247,0.22);
+    border-left: 3px solid var(--accent); border-radius: 10px; padding: 13px 18px;
+    font-size: 14px; font-weight: 400; line-height: 1.6; text-align: left;
+    max-width: 820px; color: rgba(255,255,255,0.85); margin-top: 10px;
+  }
+
+  /* ── Points ── */
+  ul.points { list-style: none; margin-top: 8px; display: flex; flex-direction: column; gap: 10px; max-width: 660px; width: 100%; }
+  ul.points li { font-size: 18px; font-weight: 400; padding: 13px 22px; background: var(--card); border: 1px solid var(--border); border-radius: 11px; text-align: left; display: flex; align-items: center; gap: 11px; }
+  ul.points li .icon { font-size: 20px; flex-shrink: 0; }
+
+  /* ── Stat ── */
+  .stat { font-size: 56px; font-weight: 900; line-height: 1; color: var(--accent); margin-bottom: 6px; }
+  .stat.orange { color: var(--accent2); }
+  .stat-label { font-size: 18px; font-weight: 300; color: var(--muted); }
+
+  /* ── Map slide ── */
+  .map-slide-layout {
+    display: grid; grid-template-columns: 420px 1fr;
+    gap: 0; width: 100%; height: 100%;
+    position: absolute; inset: 0; z-index: 2;
+  }
+  .map-left {
+    background: #0d1117; padding: 44px 32px;
+    display: flex; flex-direction: column; justify-content: center;
+    border-right: 1px solid var(--border);
+  }
+  .map-right { position: relative; overflow: hidden; }
+  .map-right iframe { width: 100%; height: 100%; border: 0; }
+  .map-right .map-overlay-label {
+    position: absolute; bottom: 16px; right: 16px;
+    background: rgba(0,0,0,0.72); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 14px;
+    font-size: 11px; color: var(--muted); letter-spacing: 1px;
+  }
+  .route-step {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; border-radius: 10px;
+    background: var(--card); border: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+  .route-step .rs-dot {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 900; flex-shrink: 0;
+  }
+  .route-step .rs-name { font-size: 14px; font-weight: 700; }
+  .route-step .rs-sub  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .route-arrow { text-align: center; color: var(--muted); font-size: 16px; margin: -2px 0 2px 14px; }
+  .route-dist { font-size: 11px; color: var(--accent); background: rgba(79,195,247,0.1); border-radius: 999px; padding: 2px 10px; margin-left: auto; flex-shrink: 0; }
+
+  /* ── Map pins legend ── */
+  .pin-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; width: 100%; margin-top: 14px; }
+  .pin-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; text-align: left; }
+  .pin-card .pin-num { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+  .pin-card .pin-name { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+  .pin-card .pin-info { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+  /* ── Nav ── */
+  #nav { position: fixed; bottom: 20px; left: 0; right: 0; display: flex; justify-content: center; align-items: center; gap: 18px; z-index: 200; }
+  #counter { font-size: 12px; font-weight: 400; letter-spacing: 1px; color: rgba(255,255,255,0.35); min-width: 48px; text-align: center; }
+  .nav-btn { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14); color: rgba(255,255,255,0.55); border-radius: 999px; padding: 7px 18px; cursor: pointer; font-size: 13px; transition: all 0.2s; font-family: inherit; }
+  .nav-btn:hover { background: rgba(255,255,255,0.13); color: #fff; }
+  #progress-bar { position: fixed; top: 0; left: 0; height: 2px; background: var(--accent); z-index: 300; transition: width 0.4s ease; }
+
+  @media print {
+    body { background: #0a0a0a; overflow: visible; }
+    #deck { width: 100%; height: auto; }
+    .slide { position: relative; opacity: 1; transform: none; page-break-after: always; }
+    #nav, #progress-bar { display: none; }
+  }
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<div id="deck-wrapper">
+<div id="deck">
+
+<!-- ══════════════════════════════════════════
+     SLIDE 01 · TITLE
+══════════════════════════════════════════ -->
+<section class="slide active" id="s1">
+  <div class="bg-img" style="background-image:url('https://images.unsplash.com/photo-1596492784531-6e6eb5ea9993?w=1280&q=80')"></div>
+  <div class="bg-overlay" style="background:linear-gradient(155deg,rgba(0,0,0,0.55),rgba(0,15,35,0.85))"></div>
+  <div class="eyebrow">🌴 Family Trip 2025</div>
+  <h1 class="lg">오키나와 가족여행</h1>
+  <div class="divider"></div>
+  <p class="sub">6박 7일 · 21개월 지호와 함께하는 여유만만 오키나와</p>
+  <div class="date-badge">2025년 4월 15일 — 4월 21일</div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 02 · 전체 개요
+══════════════════════════════════════════ -->
+<section class="slide" id="s2">
+  <div class="bg-overlay" style="background:#0a0a0a; position:absolute; inset:0; z-index:0;"></div>
+  <div class="eyebrow">Overview</div>
+  <h1 class="sm">7일 여행 한눈에 보기</h1>
+  <div class="card-grid">
+    <div class="card">
+      <div class="day-num">Day 1 · 4/15</div>
+      <div class="day-title">🏙️ 나하 적응</div>
+      <div class="day-desc">공항 도착 → 렌터카 인수<br>국제거리 · 호텔 콜렉티브</div>
+    </div>
+    <div class="card">
+      <div class="day-num">Day 2 · 4/16</div>
+      <div class="day-title">🚗 중부 드라이브</div>
+      <div class="day-desc">아메리칸 빌리지<br>→ 부세나 테라스 체크인</div>
+    </div>
+    <div class="card">
+      <div class="day-num">Day 3 · 4/17</div>
+      <div class="day-title">🐳 츄라우미 수족관</div>
+      <div class="day-desc">돌고래쇼 · 키시모토 소바<br>야키니쿠 류큐의 소 🔥</div>
+    </div>
+    <div class="card">
+      <div class="day-num">Day 4 · 4/18</div>
+      <div class="day-title">🏖️ 완전 호캉스</div>
+      <div class="day-desc">글라스 바텀 보트<br>수영장 · 룸서비스</div>
+    </div>
+    <div class="card">
+      <div class="day-num">Day 5 · 4/19</div>
+      <div class="day-title">🛍️ 이온몰 → 남부</div>
+      <div class="day-desc">라이카무 쇼핑<br>난조 에어비앤비</div>
+    </div>
+    <div class="card" style="background:rgba(79,195,247,0.07);border-color:rgba(79,195,247,0.2)">
+      <div class="day-num" style="color:var(--accent2)">Day 6–7</div>
+      <div class="day-title">🌊 남부 힐링 & 귀국</div>
+      <div class="day-desc">오지마 섬 · 쿠루쿠마<br>KE2148 · 나하 12:50↑</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 03 · DAY 1 일정
+══════════════════════════════════════════ -->
+<section class="slide" id="s3">
+  <div class="bg-img" style="background-image:url('https://images.unsplash.com/photo-1513407030348-c983a97b98d8?w=1280&q=80')"></div>
+  <div class="bg-overlay"></div>
+  <div class="eyebrow">Day 1 · 4월 15일 (수)</div>
+  <h1 class="sm">나하 시내 · 첫날 적응</h1>
+  <div class="split" style="align-items:start">
+    <div class="timeline" style="max-width:none">
+      <div class="tl-row">
+        <a href="https://maps.google.com/?q=나하공항" target="_blank">
+          <span class="tl-time">11:35</span><span class="tl-icon">✈️</span>
+          <div class="tl-content"><div class="tl-title">나하 공항 도착 · 렌터카 인수</div><div class="tl-desc">지호용 카시트 장착 필수 확인!</div></div>
+          <span class="map-badge">📍 지도</span>
+        </a>
+      </div>
+      <div class="tl-row">
+        <a href="https://maps.google.com/?q=Daito+Soba+Naha+Okinawa" target="_blank">
+          <span class="tl-time">13:30</span><span class="tl-icon">🍜</span>
+          <div class="tl-content"><div class="tl-title">다이토 소바 점심</div><div class="tl-desc">맑은 국물 · 부드러운 면발 · 지호 먹이기 최적</div></div>
+          <span class="map-badge">📍 지도</span>
+        </a>
+      </div>
+      <div class="tl-row">
+        <a href="https://maps.google.com/?q=Hotel+Collective+Naha+Okinawa" target="_blank">
+          <span class="tl-time">15:00</span><span class="tl-icon">🏨</span>
+          <div class="tl-content"><div class="tl-title">호텔 콜렉티브 체크인</div><div class="tl-desc">국제거리 한복판 · 유모차 이동 최적</div></div>
+          <span class="map-badge">📍 지도</span>
+        </a>
+      </div>
+      <div class="tl-row">
+        <a href="https://maps.google.com/?q=Kokusai+Street+Naha" target="_blank">
+          <span class="tl-time">16:30</span><span class="tl-icon">🛍️</span>
+          <div class="tl-content"><div class="tl-title">국제거리 산책 · 돈키호테</div><div class="tl-desc">블루씰 자색고구마 아이스크림 🍦</div></div>
+          <span class="map-badge">📍 지도</span>
+        </a>
+      </div>
+      <div class="tl-row">
+        <a href="https://maps.google.com/?q=Steakhouse+88+Kokusai+Naha" target="_blank">
+          <span class="tl-time">18:00</span><span class="tl-icon">🥩</span>
+          <div class="tl-content"><div class="tl-title">스테이크하우스 88</div><div class="tl-desc">피곤하면 호텔 콜렉티브 뷔페도 강추</div></div>
+          <span class="map-badge">📍 지도</span>
+        </a>
+      </div>
+    </div>
+    <!-- 음식 사진 -->
+    <div>
+      <div class="img-card" style="height:200px;margin-bottom:10px">
+        <img src="https://lh3.googleusercontent.com/p/AF1QipMmYVXZB7tQ6R07M74yymmhhx_QPOFLE7BrGNms=s680-w680-h510-rw" alt="다이토 소바" onerror="this.style.display='none'">
+        <div class="caption">🍜 다이토 소바 — 맑고 깔끔한 국물</div>
+      </div>
+      <div class="tip-box" style="max-width:none">
+        💡 <strong>오늘의 포인트</strong><br>
+        첫날은 무리하지 말고 국제거리 산책으로 가볍게 적응. 지호 낮잠 시간 최우선!
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 04 · 이동 지도 (나하 → 중부)
+══════════════════════════════════════════ -->
+<section class="slide" id="s4-map">
+  <div class="map-slide-layout">
+    <div class="map-left">
+      <div class="eyebrow" style="margin-bottom:20px">Route · Day 2</div>
+      <h1 class="xs" style="margin-bottom:20px">나하 → 아메리칸 빌리지 → 부세나 테라스</h1>
+
+      <div class="route-step">
+        <div class="rs-dot" style="background:rgba(79,195,247,0.2);color:var(--accent)">1</div>
+        <div><div class="rs-name">🏨 호텔 콜렉티브 출발</div><div class="rs-sub">나하 시내 · 09:30</div></div>
+      </div>
+      <div class="route-arrow">↓ <span style="font-size:11px;color:var(--accent)">약 30분 · 오키나와 자동차도</span></div>
+
+      <div class="route-step">
+        <div class="rs-dot" style="background:rgba(255,152,0,0.2);color:var(--accent2)">2</div>
+        <div><div class="rs-name">🎡 아메리칸 빌리지 (차탄)</div><div class="rs-sub">이국적 가족사진 · 점심 · 11:30</div></div>
+        <span class="route-dist">30km</span>
+      </div>
+      <div class="route-arrow">↓ <span style="font-size:11px;color:var(--accent)">약 60분 (지호 낮잠 타임 활용!)</span></div>
+
+      <div class="route-step">
+        <div class="rs-dot" style="background:rgba(100,221,100,0.2);color:#64dd64">3</div>
+        <div><div class="rs-name">🏖️ 더 부세나 테라스</div><div class="rs-sub">나고시 · 체크인 15:30</div></div>
+        <span class="route-dist">60km</span>
+      </div>
+
+      <div class="tip-box" style="margin-top:18px;font-size:13px">
+        🚗 총 이동 약 90km · 오키나와 자동차도(58호선) 이용<br>
+        <span style="color:var(--accent2)">아메리칸 빌리지 → 부세나 이동 = 지호 낮잠 골든 타임</span>
+      </div>
+    </div>
+    <div class="map-right">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m40!1m8!1m3!1d230000!2d127.78!3d26.45!3m2!1i1024!2i768!4f13.1!4m29!3e0!4m5!1s0x34e56851fc2d8beb%3A0x8c4d6ec3e7b60d6!2z44Ob44OG44Or44Kz44Os44Kv44OG44Kj44Ow%2C%E9%82%A3%E8%A6%87%E5%B8%82!3m2!1d26.2124!2d127.6792!4m5!1s0x34e4f8c8cef2c7b1%3A0x91d14e11fa06a766!2z44Ki44Oh44Oq44Kr44Oz44Oa44Os44OW44K444CB%E6%B2%96%E7%B8%84%E7%9C%8C!3m2!1d26.3107!2d127.7572!4m5!1s0x34e42c91c15e8fcb%3A0x1e1ec3b3e71c7c6e!2z44OW44K744OK44OG44Op44K6!3m2!1d26.4833!2d127.9444!4m5!1s0x34e3641bfb0b0e69%3A0xe77a4ec80c7fc4e7!2z44Oa44K344OK44OG44Op44K6!3m2!1d26.5919!2d127.9774!5e0!3m2!1sja!2sjp!4v1700000000000"
+        allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+      <div class="map-overlay-label">Google Maps · 나하 → 부세나</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 05 · DAY 2 일정
+══════════════════════════════════════════ -->
+<section class="slide" id="s5">
+  <div class="bg-img" style="background-image:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1280&q=80')"></div>
+  <div class="bg-overlay"></div>
+  <div class="eyebrow">Day 2 · 4월 16일 (목)</div>
+  <h1 class="sm">중부 드라이브 & 부세나 입성 🏖️</h1>
+  <div class="split">
+    <div class="timeline" style="max-width:none">
+      <div class="tl-row">
+        <a href="https://maps.google.com/?q=American+Village+Chatan+Okinawa" target="_blank">
+          <span class="tl-time">11:30</span><span class="tl-icon">🎡</span>
+          <div class="tl-content"><div class="tl-title">아메리칸 빌리지 산책</div><div class="tl-desc">이국적 배경으로 가족사진 남기기</div></div>
+          <span class="map-badge">📍 지도</span>
+        </a>
+      </div>
+      <div class="tl-row">
+        <a href="https://maps.google.com/?q=Gourmet+Sushi+Chatan+Okinawa" target="_blank">
+          <span class="tl-time">12:30</span><span class="tl-icon">🍣</span>
+          <div class="tl-content"><div class="tl-title">구루메 스시</div><div class="tl-desc">계란초밥 · 우동 등 아이 메뉴 풍부</div></div>
+          <span class="map-badge">📍 지도</span>
+        </a>
+      </div>
+      <div class="tl-row">
+        <a href="https://maps.google.com/?q=The+Busena+Terrace+Nago+Okinawa" target="_blank">
+          <span class="tl-time">15:30</span><span class="tl-icon">🏖️</span>
+          <div class="tl-content"><div class="tl-title">더 부세나 테라스 체크인</div><div class="tl-desc">오키나와 최고의 서비스 · 발렛파킹</div></div>
+          <span class="map-badge">📍 지도</span>
+        </a>
+      </div>
+      <div class="tl-row">
+        <a href="https://maps.google.com/?q=La+Tida+Busena+Terrace" target="_blank">
+          <span class="tl-time">18:00</span><span class="tl-icon">🍽️</span>
+          <div class="tl-content"><div class="tl-title">라 티다 뷔페 (리조트 내)</div><div class="tl-desc">빵·과일·죽·생선구이 — 아기 메뉴 풍부</div></div>
+          <span class="map-badge">📍 지도</span>
+        </a>
+      </div>
+    </div>
+    <div>
+      <div class="img-card" style="height:200px;margin-bottom:10px">
+        <img src="https://mblogthumb-phinf.pstatic.net/MjAxNjExMDlfMTUy/MDAxNDc4NjYzMjU1MjM0.IIICynRVdoKNB_I9kpWrW3rniNKM3ui3ALom7zHNQb0g.9-0cKq6KXXNBoefxM93PhRkgUTv8Thin5XAy9bHNkusg.JPEG.talove0831/DSC00314.JPG?type=w800" alt="구루메 스시" onerror="this.style.display='none'">
+        <div class="caption">🍣 구루메 스시 — 아이 메뉴 풍부한 회전초밥</div>
+      </div>
+      <div class="tags">
+        <span class="tag">아메리칸 빌리지 가족사진</span>
+        <span class="tag orange">부세나 테라스 체크인</span>
+        <span class="tag">발렛파킹 가능</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 06 · 이동 지도 (나하 → 북부 츄라우미)
+══════════════════════════════════════════ -->
+<section class="slide" id="s6-map">
+  <div class="map-slide-layout">
+    <div class="map-left">
+      <div class="eyebrow" style="margin-bottom:20px">Route · Day 3</div>
+      <h1 class="xs" style="margin-bottom:20px">부세나 테라스 → 츄라우미 수족관</h1>
+
+      <div class="route-step">
+        <div class="rs-dot" style="background:rgba(79,195,247,0.2);color:var(--accent)">1</div>
+        <div><div class="rs-name">🏖️ 부세나 테라스 출발</div><div class="rs-sub">나고시 · 10:00</div></div>
+      </div>
+      <div class="route-arrow">↓ <span style="font-size:11px;color:var(--accent)">약 45분 · 58호선 북상</span></div>
+
+      <div class="route-step">
+        <div class="rs-dot" style="background:rgba(255,152,0,0.2);color:var(--accent2)">2</div>
+        <div><div class="rs-name">🐳 츄라우미 수족관</div><div class="rs-sub">모토부 · 10:30 도착</div></div>
+        <span class="route-dist">약 35km</span>
+      </div>
+      <div class="route-arrow">↓ <span style="font-size:11px;color:var(--accent)">도보 5분</span></div>
+
+      <div class="route-step">
+        <div class="rs-dot" style="background:rgba(100,221,100,0.2);color:#64dd64">3</div>
+        <div><div class="rs-name">🍜 키시모토 식당</div><div class="rs-sub">수족관 근처 · 13:30</div></div>
+        <span class="route-dist">도보</span>
+      </div>
+      <div class="route-arrow">↓ <span style="font-size:11px;color:var(--accent)">약 45분 · 부세나 복귀</span></div>
+      <div class="route-step">
+        <div class="rs-dot" style="background:rgba(255,100,100,0.2);color:#ff6464">4</div>
+        <div><div class="rs-name">🥩 야키니쿠 류큐의 소</div><div class="rs-sub">나고시 · 저녁 18:00 🔥예약필수</div></div>
+        <span class="route-dist">약 35km</span>
+      </div>
+
+      <div class="tip-box" style="margin-top:14px;font-size:12px">
+        ⏰ <strong>13:00 돌고래 쇼</strong>에 맞춰 입장 동선 계획<br>
+        유모차 대여 가능 · 수족관 내 수유실 완비
+      </div>
+    </div>
+    <div class="map-right">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m28!1m8!1m3!1d180000!2d127.88!3d26.65!3m2!1i1024!2i768!4f13.1!4m17!3e0!4m5!1s0x34e3641bfb0b0e69%3A0xe77a4ec80c7fc4e7!2z44Oa44K144Kh44OG44Op44K6!3m2!1d26.5919!2d127.9774!4m5!1s0x34e462b5f5ec5709%3A0xb8f4c3d7c34c5b3d!2z5rKZ5pmS5rWm5rWm6Iqx6a2a!3m2!1d26.6937!2d127.8783!5e0!3m2!1sja!2sjp!4v1700000000000"
+        allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+      <div class="map-overlay-label">Google Maps · 부세나 → 츄라우미</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 07 · DAY 3 일정 (츄라우미)
+══════════════════════════════════════════ -->
+<section class="slide" id="s7">
+  <div class="bg-img" style="background-image:url('https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=1280&q=80')"></div>
+  <div class="bg-overlay" style="background:linear-gradient(to bottom,rgba(0,5,20,0.65),rgba(0,0,0,0.82))"></div>
+  <div class="eyebrow">Day 3 · 4월 17일 (금)</div>
+  <h1 class="sm">🐳 바닷속 친구들 만나는 날</h1>
+  <div class="split">
+    <div>
+      <div class="img-card" style="height:220px;margin-bottom:10px">
+        <img src="https://ohh.okinawa/wpdir/wp-content/uploads/2018/10/28edf4533771a2e2d61c2efb71328057.jpg" alt="츄라우미 수족관" onerror="this.style.display='none'">
+        <div class="caption">🐋 츄라우미 수족관 — 세계 최대급 아크릴 수조</div>
+      </div>
+      <!-- 음식 사진 2장 -->
+      <div class="photo-strip" style="height:110px">
+        <div class="ps-item">
+          <a href="https://maps.google.com/?q=Kishimoto+Shokudo+Motobu+Okinawa" target="_blank">
+            <img src="https://mblogthumb-phinf.pstatic.net/MjAxODA0MDVfMTUz/MDAxNTIyOTE4MTg4MjQ3.mCwD6XktbKKwNaA-NlGX857a6Esc1jXlRgy8gIxKEBEg.JvkoNxvwY5h_VN1dBW_yMDp20Vgiwi_33xcMixA8NCgg.JPEG.seulgi0517/%EC%A0%9C%EB%AA%A9_%EC%97%86%EC%9D%8C.jpg?type=w800" alt="키시모토 소바" onerror="this.style.display='none'">
+            <div class="ps-label">🍜 키시모토 식당</div>
+          </a>
+        </div>
+        <div class="ps-item">
+          <a href="https://maps.google.com/?q=Yakiniku+Ryukyu+no+Ushi+Nago+Okinawa" target="_blank">
+            <img src="https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2FbbOTMQ%2FdJMcaeML0aE%2FAAAAAAAAAAAAAAAAAAAAAHp69aazTWyPyBXIGL4_OOlJrT6IDekdRnkBIA3nYSlY%2Fimg.jpg%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1774969199%26allow_ip%3D%26allow_referer%3D%26signature%3DhIJsvjsA5xcwUOtRP5Iw2GPO7J0%253D" alt="야키니쿠 류큐의 소" onerror="this.style.display='none'">
+            <div class="ps-label">🥩 류큐의 소 (예약필수)</div>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="timeline" style="max-width:none">
+      <div class="tl-row">
+        <a href="https://maps.google.com/?q=Okinawa+Churaumi+Aquarium" target="_blank">
+          <span class="tl-time">10:30</span><span class="tl-icon">🐠</span>
+          <div class="tl-content"><div class="tl-title">츄라우미 수족관</div><div class="tl-desc">13:00 오키짱 돌고래 쇼 · 유모차 대여 가능</div></div>
+          <span class="map-badge">📍 지도</span>
+        </a>
+      </div>
+      <div class="tl-row">
+        <a href="https://maps.google.com/?q=Kishimoto+Shokudo+Motobu+Okinawa" target="_blank">
+          <span class="tl-time">13:30</span><span class="tl-icon">🍜</span>
+          <div class="tl-content"><div class="tl-title">키시모토 식당 소바</div><div class="tl-desc">영양밥(쥬시)+소바 세트 · 아이들 정말 잘 먹음</div></div>
+          <span class="map-badge">📍 지도</span>
+        </a>
+      </div>
+      <div class="tl-row">
+        <span class="tl-time">15:30</span><span class="tl-icon">😴</span>
+        <div class="tl-content"><div class="tl-title">리조트 복귀 · 낮잠 · 휴식</div><div class="tl-desc">지호 낮잠 & 부모님 리조트 풀 타임</div></div>
+      </div>
+      <div class="tl-row">
+        <a href="https://maps.google.com/?q=Yakiniku+Ryukyu+no+Ushi+Nago+Okinawa" target="_blank">
+          <span class="tl-time">18:00</span><span class="tl-icon">🔥</span>
+          <div class="tl-content"><div class="tl-title">야키니쿠 류큐의 소</div><div class="tl-desc">⚠️ 미리 예약 필수 · 와규 화로구이 · 개별 룸</div></div>
+          <span class="map-badge">📍 지도</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 08 · DAY 4 호캉스
+══════════════════════════════════════════ -->
+<section class="slide" id="s8">
+  <div class="bg-img" style="background-image:url('https://images.unsplash.com/photo-1540202404-1b927e27fa8b?w=1280&q=80')"></div>
+  <div class="bg-overlay" style="background:linear-gradient(155deg,rgba(0,5,25,0.7),rgba(0,0,0,0.82))"></div>
+  <div class="eyebrow">Day 4 · 4월 18일 (토)</div>
+  <h1>온전한 호캉스 🌊</h1>
+  <div class="divider"></div>
+  <div class="split" style="max-width:1080px">
+    <div class="timeline" style="max-width:none">
+      <div class="tl-row">
+        <a href="https://maps.google.com/?q=Busena+Marine+Park+Nago" target="_blank">
+          <span class="tl-time">11:00</span><span class="tl-icon">🚢</span>
+          <div class="tl-content"><div class="tl-title">글라스 바텀 보트</div><div class="tl-desc">배 바닥 유리로 열대어 관찰 — 지호 환호 보장!</div></div>
+          <span class="map-badge">📍 지도</span>
+        </a>
+      </div>
+      <div class="tl-row">
+        <a href="https://maps.google.com/?q=Shimabutaya+Nago+Okinawa" target="_blank">
+          <span class="tl-time">12:30</span><span class="tl-icon">🐷</span>
+          <div class="tl-content"><div class="tl-title">시마부타야 점심</div><div class="tl-desc">아구 흑돼지 샤브샤브 · 맑은 육수 · 아기 먹이기 최적</div></div>
+          <span class="map-badge">📍 지도</span>
+        </a>
+      </div>
+      <div class="tl-row">
+        <span class="tl-time">14:00</span><span class="tl-icon">🏊</span>
+        <div class="tl-content"><div class="tl-title">수영장 물놀이 & 해변 모래놀이</div><div class="tl-desc">지호 낮잠 후 부부 테라스 맥주 타임 ☕</div></div>
+      </div>
+      <div class="tl-row">
+        <a href="https://maps.google.com/?q=The+Busena+Terrace+Mahae" target="_blank">
+          <span class="tl-time">18:00</span><span class="tl-icon">🍱</span>
+          <div class="tl-content"><div class="tl-title">리조트 룸서비스 or 마후에(Mahae)</div><div class="tl-desc">오늘은 절대 나가지 않기 — 정갈한 일본 가정식</div></div>
+          <span class="map-badge">📍 지도</span>
+        </a>
+      </div>
+    </div>
+    <div>
+      <div class="img-card" style="height:220px;margin-bottom:10px">
+        <img src="https://dry7pvlp22cox.cloudfront.net/mrt-images-prod/2023/05/21/5BDn/cu6Wu5ydiA.jpeg?quality=70.0&width=1080" alt="시마부타야" onerror="this.style.display='none'">
+        <div class="caption">🐷 시마부타야 — 아구 흑돼지 샤브샤브</div>
+      </div>
+      <div class="tip-box" style="max-width:none;font-size:13px">
+        💡 오늘 하루 리조트 밖으로 한 발짝도 불필요.<br>
+        글라스 바텀 보트는 리조트 부지 내 위치!
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 09 · 이동 지도 (북부 → 남부)
+══════════════════════════════════════════ -->
+<section class="slide" id="s9-map">
+  <div class="map-slide-layout">
+    <div class="map-left">
+      <div class="eyebrow" style="margin-bottom:20px">Route · Day 5</div>
+      <h1 class="xs" style="margin-bottom:20px">부세나 테라스 → 이온몰 → 난조 에어비앤비</h1>
+
+      <div class="route-step">
+        <div class="rs-dot" style="background:rgba(79,195,247,0.2);color:var(--accent)">1</div>
+        <div><div class="rs-name">🏖️ 부세나 테라스 체크아웃</div><div class="rs-sub">나고시 · 10:00</div></div>
+      </div>
+      <div class="route-arrow">↓ <span style="font-size:11px;color:var(--accent)">약 60분 · 자동차도 남하</span></div>
+
+      <div class="route-step">
+        <div class="rs-dot" style="background:rgba(255,152,0,0.2);color:var(--accent2)">2</div>
+        <div><div class="rs-name">🛍️ 이온몰 라이카무</div><div class="rs-sub">오키나와 최대 쇼핑몰 · 11:30</div></div>
+        <span class="route-dist">약 55km</span>
+      </div>
+      <div class="route-arrow">↓ <span style="font-size:11px;color:var(--accent)">약 30분</span></div>
+
+      <div class="route-step">
+        <div class="rs-dot" style="background:rgba(100,221,100,0.2);color:#64dd64">3</div>
+        <div><div class="rs-name">🏡 난조시 에어비앤비</div><div class="rs-sub">체크인 · 16:30</div></div>
+        <span class="route-dist">약 20km</span>
+      </div>
+      <div class="route-arrow">↓ <span style="font-size:11px;color:var(--accent)">근처</span></div>
+      <div class="route-step">
+        <div class="rs-dot" style="background:rgba(255,100,100,0.2);color:#ff8888">4</div>
+        <div><div class="rs-name">🛒 산에이 마트 장보기</div><div class="rs-sub">지호 식재료 & 신선 초밥 · 18:00</div></div>
+        <span class="route-dist">도보권</span>
+      </div>
+
+      <div class="tip-box" style="margin-top:14px;font-size:12px">
+        🏬 이온몰 = 수유실·아기의자 최강 인프라<br>
+        <span style="color:var(--accent2)">아카짱혼포에서 필요한 아기용품 쇼핑 추천</span>
+      </div>
+    </div>
+    <div class="map-right">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m34!1m8!1m3!1d300000!2d127.82!3d26.38!3m2!1i1024!2i768!4f13.1!4m23!3e0!4m5!1s0x34e3641bfb0b0e69%3A0xe77a4ec80c7fc4e7!2z44Oa44K144Kh44OG44Op44K6!3m2!1d26.5919!2d127.9774!4m5!1s0x34e5665bcb40e921%3A0x8b1e3bb67289dc35!2zSU9N44Gu44Or44Kk44Kr44Og!3m2!1d26.3528!2d127.7933!4m5!1s0x34e56a3b6f8d8a8d%3A0x12345678!2z5Y2D57eR5biC!3m2!1d26.1671!2d127.7780!5e0!3m2!1sja!2sjp!4v1700000000000"
+        allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+      <div class="map-overlay-label">Google Maps · 부세나 → 이온몰 → 난조</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 10 · DAY 5 일정
+══════════════════════════════════════════ -->
+<section class="slide" id="s10">
+  <div class="bg-img" style="background-image:url('https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=1280&q=80')"></div>
+  <div class="bg-overlay"></div>
+  <div class="eyebrow">Day 5 · 4월 19일 (일)</div>
+  <h1 class="sm">🛍️ 이온몰 라이카무 → 남부 에어비앤비</h1>
+  <div class="timeline">
+    <div class="tl-row">
+      <span class="tl-time">10:00</span><span class="tl-icon">🏨</span>
+      <div class="tl-content"><div class="tl-title">부세나 테라스 체크아웃</div><div class="tl-desc">아쉽지만 남부로 출발 🚗</div></div>
+    </div>
+    <div class="tl-row">
+      <a href="https://maps.google.com/?q=AEON+Mall+Okinawa+Rycom" target="_blank">
+        <span class="tl-time">11:30</span><span class="tl-icon">🏬</span>
+        <div class="tl-content"><div class="tl-title">이온몰 라이카무 (오키나와 최대 규모)</div><div class="tl-desc">수유실 · 아기의자 최고 / 아카짱혼포 쇼핑 / 지호 유모차 낮잠</div></div>
+        <span class="map-badge">📍 지도</span>
+      </a>
+    </div>
+    <div class="tl-row">
+      <a href="https://maps.google.com/?q=Nanjo+Okinawa" target="_blank">
+        <span class="tl-time">15:30</span><span class="tl-icon">🏡</span>
+        <div class="tl-content"><div class="tl-title">난조시 에어비앤비 체크인</div><div class="tl-desc">부엌 활용 — 지호 맞춤 식사 가능</div></div>
+        <span class="map-badge">📍 지도</span>
+      </a>
+    </div>
+    <div class="tl-row">
+      <a href="https://maps.google.com/?q=San-A+Supermarket+Nanjo+Okinawa" target="_blank">
+        <span class="tl-time">18:00</span><span class="tl-icon">🛒</span>
+        <div class="tl-content"><div class="tl-title">산에이 마트 장보기 → 숙소 식사</div><div class="tl-desc">신선 초밥 · 도시락 · 지호 식재료 구매 → 집처럼 편안한 저녁</div></div>
+        <span class="map-badge">📍 지도</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 11 · 이동 지도 (남부 드라이브)
+══════════════════════════════════════════ -->
+<section class="slide" id="s11-map">
+  <div class="map-slide-layout">
+    <div class="map-left">
+      <div class="eyebrow" style="margin-bottom:20px">Route · Day 6</div>
+      <h1 class="xs" style="margin-bottom:20px">난조 에어비앤비 중심 남부 드라이브</h1>
+
+      <div class="route-step">
+        <div class="rs-dot" style="background:rgba(79,195,247,0.2);color:var(--accent)">1</div>
+        <div><div class="rs-name">🏡 에어비앤비 출발</div><div class="rs-sub">난조시 · 11:00</div></div>
+      </div>
+      <div class="route-arrow">↓ <span style="font-size:11px;color:var(--accent)">약 20분</span></div>
+
+      <div class="route-step">
+        <div class="rs-dot" style="background:rgba(255,152,0,0.2);color:var(--accent2)">2</div>
+        <div><div class="rs-name">🏝️ 오지마 섬 드라이브</div><div class="rs-sub">차로 다리를 건너는 작은 섬 · 산책</div></div>
+        <span class="route-dist">약 15km</span>
+      </div>
+      <div class="route-arrow">↓ <span style="font-size:11px;color:var(--accent)">약 15분</span></div>
+
+      <div class="route-step">
+        <div class="rs-dot" style="background:rgba(100,221,100,0.2);color:#64dd64">3</div>
+        <div><div class="rs-name">☕ 카페 쿠루쿠마 점심</div><div class="rs-sub">태평양 뷰 · 잔디밭 · 12:00</div></div>
+        <span class="route-dist">약 10km</span>
+      </div>
+      <div class="route-arrow">↓ <span style="font-size:11px;color:var(--accent)">약 10분</span></div>
+      <div class="route-step">
+        <div class="rs-dot" style="background:rgba(200,100,255,0.2);color:#c864ff">4</div>
+        <div><div class="rs-name">🌿 치넨미사키 공원</div><div class="rs-sub">유모차 산책 최적 · 탁 트인 평지</div></div>
+        <span class="route-dist">약 5km</span>
+      </div>
+
+      <div class="tip-box" style="margin-top:14px;font-size:12px">
+        🌊 남부는 거리가 짧아 여유로운 드라이브<br>
+        <span style="color:var(--accent2)">총 이동 약 40km · 완전 힐링 코스</span>
+      </div>
+    </div>
+    <div class="map-right">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m40!1m8!1m3!1d120000!2d127.79!3d26.11!3m2!1i1024!2i768!4f13.1!4m29!3e0!4m5!1s0x34e560abc12345%3A0xabcdef!2z5Y2D57eR5biC!3m2!1d26.1671!2d127.7780!4m5!1s0x34e55f01234567%3A0x89abcd!2z5aWI5bO25bO2!3m2!1d26.0831!2d127.8202!4m5!1s0x34e55e98765432%3A0x12345!2z44Kr44OV5YCJ44GP44Or44Kx!3m2!1d26.0728!2d127.8398!4m5!1s0x34e55d3456789a%3A0xbcdef!2z5rKZ5qiK5a6Z5Y2X5YWs5ZyS!3m2!1d26.0899!2d127.8612!5e0!3m2!1sja!2sjp!4v1700000000000"
+        allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+      <div class="map-overlay-label">Google Maps · 남부 드라이브 코스</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 12 · DAY 6 일정
+══════════════════════════════════════════ -->
+<section class="slide" id="s12">
+  <div class="bg-img" style="background-image:url('https://images.unsplash.com/photo-1473625247510-8ceb1760943f?w=1280&q=80')"></div>
+  <div class="bg-overlay" style="background:linear-gradient(165deg,rgba(0,15,5,0.68),rgba(0,0,0,0.84))"></div>
+  <div class="eyebrow">Day 6 · 4월 20일 (월)</div>
+  <h1 class="sm">🌊 남부의 자연과 힐링 카페</h1>
+  <div class="split">
+    <div>
+      <div class="photo-strip" style="margin-bottom:10px">
+        <div class="ps-item">
+          <a href="https://maps.google.com/?q=Cafe+Kurukuma+Nanjo+Okinawa" target="_blank">
+            <img src="https://www.okinawa-essay.com/wp-content/uploads/2021/12/%EC%98%A4%ED%82%A4%EB%82%98%EC%99%80-%EC%B9%B4%ED%8E%98-%EC%BF%A0%EB%A3%A8%EC%BF%A0%EB%A7%884-1030x686.jpg" style="height:155px" alt="카페 쿠루쿠마" onerror="this.style.display='none'">
+            <div class="ps-label">☕ 카페 쿠루쿠마</div>
+          </a>
+        </div>
+        <div class="ps-item">
+          <a href="https://maps.google.com/?q=Chinen+Misaki+Park+Okinawa" target="_blank">
+            <img src="https://enjoyokinawa.cerulean-blue.co.jp/ko/wp-content/uploads/sites/4/2023/12/IMG_8683.jpg" style="height:155px" alt="치넨미사키" onerror="this.style.display='none'">
+            <div class="ps-label">🌿 치넨미사키 공원</div>
+          </a>
+        </div>
+        <div class="ps-item">
+          <a href="https://maps.google.com/?q=Nakamura+Soba+Nanjo+Okinawa" target="_blank">
+            <img src="https://mblogthumb-phinf.pstatic.net/MjAxODA1MjJfMjQz/MDAxNTI2OTk0ODM5MjEx.cOqAU5lOIk8UKehxlZ8mfibC8o3gZxuXa-h4PDpEfRsg.xU4Rk3-R9no0kncWCBITChAh-caITzvR3Vi6lI43ZEEg.JPEG.ddaengjo/nakamura_12.jpg?type=w800" style="height:155px" alt="나카무라 소바" onerror="this.style.display='none'">
+            <div class="ps-label">🍜 나카무라 소바</div>
+          </a>
+        </div>
+      </div>
+      <div class="tags">
+        <span class="tag">태평양 오션뷰</span>
+        <span class="tag">지호 잔디 산책</span>
+        <span class="tag orange">유모차 완벽 코스</span>
+      </div>
+    </div>
+    <div class="timeline" style="max-width:none">
+      <div class="tl-row">
+        <a href="https://maps.google.com/?q=Ojima+Island+Nanjo+Okinawa" target="_blank">
+          <span class="tl-time">11:00</span><span class="tl-icon">🏝️</span>
+          <div class="tl-content"><div class="tl-title">오지마 섬 드라이브 & 산책</div><div class="tl-desc">차로 다리를 건너는 작은 섬</div></div>
+          <span class="map-badge">📍 지도</span>
+        </a>
+      </div>
+      <div class="tl-row">
+        <a href="https://maps.google.com/?q=Cafe+Kurukuma+Nanjo+Okinawa" target="_blank">
+          <span class="tl-time">12:00</span><span class="tl-icon">☕</span>
+          <div class="tl-content"><div class="tl-title">카페 쿠루쿠마 점심</div><div class="tl-desc">태평양 뷰 · 넓은 잔디밭 · 볶음밥·디저트</div></div>
+          <span class="map-badge">📍 지도</span>
+        </a>
+      </div>
+      <div class="tl-row">
+        <a href="https://maps.google.com/?q=Chinen+Misaki+Park+Okinawa" target="_blank">
+          <span class="tl-time">14:00</span><span class="tl-icon">🌿</span>
+          <div class="tl-content"><div class="tl-title">치넨미사키 공원 산책</div><div class="tl-desc">탁 트인 평지 · 유모차 끌기 최적</div></div>
+          <span class="map-badge">📍 지도</span>
+        </a>
+      </div>
+      <div class="tl-row">
+        <a href="https://maps.google.com/?q=Nakamura+Soba+Nanjo+Okinawa" target="_blank">
+          <span class="tl-time">18:00</span><span class="tl-icon">🍜</span>
+          <div class="tl-content"><div class="tl-title">나카무라 소바 저녁</div><div class="tl-desc">마지막 밤 · 따뜻한 국물로 마무리</div></div>
+          <span class="map-badge">📍 지도</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 13 · DAY 7 귀국
+══════════════════════════════════════════ -->
+<section class="slide" id="s13">
+  <div class="bg-img" style="background-image:url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1280&q=80')"></div>
+  <div class="bg-overlay"></div>
+  <div class="eyebrow">Day 7 · 4월 21일 (화)</div>
+  <h1>아쉬운 안녕 ✈️</h1>
+  <div class="divider"></div>
+  <ul class="points" style="max-width:680px">
+    <li><span class="icon">🌅</span> 08:30 기상 — 남은 식재료로 마지막 아침 식사</li>
+    <li><span class="icon">🚗</span> 09:30 체크아웃 → 나하 공항 렌터카 반납</li>
+    <li><span class="icon">⚠️</span> 평일 출근 시간대 — 공항까지 여유 있게 출발!</li>
+  </ul>
+  <div style="margin-top:28px;display:flex;gap:48px;align-items:center;justify-content:center">
+    <div style="text-align:center">
+      <div class="stat orange">KE2148</div>
+      <div class="stat-label">귀국편 항공</div>
+    </div>
+    <div style="width:1px;height:72px;background:var(--border)"></div>
+    <div style="text-align:center">
+      <div class="stat">12:50</div>
+      <div class="stat-label">나하 출발</div>
+    </div>
+    <div style="width:1px;height:72px;background:var(--border)"></div>
+    <div style="text-align:center">
+      <div class="stat" style="font-size:46px;color:#64dd64">6박 7일</div>
+      <div class="stat-label">소중한 추억 완성 🌴</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 14 · 맛집 가이드
+══════════════════════════════════════════ -->
+<section class="slide" id="s14">
+  <div class="bg-overlay" style="background:#0a0a0a;position:absolute;inset:0;z-index:0"></div>
+  <div class="eyebrow">Restaurant Guide</div>
+  <h1 class="xs" style="margin-bottom:12px">지호와 함께 가기 좋은 플랜 B 맛집 🍜</h1>
+  <div class="pin-grid">
+    <div class="pin-card">
+      <div class="pin-num">나하 · 플랜 B</div>
+      <div class="pin-name">유난기 (Yunangi)</div>
+      <div class="pin-info">라후테(돼지조림)+쥬시 · 지호 밥 먹이기 최고</div>
+    </div>
+    <div class="pin-card">
+      <div class="pin-num">나하 · 플랜 B</div>
+      <div class="pin-name">류보백화점 식당가</div>
+      <div class="pin-info">수유실·기저귀대 완비 · 함박스테이크 정식</div>
+    </div>
+    <div class="pin-card">
+      <div class="pin-num">나하 · 카페</div>
+      <div class="pin-name">C&C Breakfast Okinawa</div>
+      <div class="pin-info">하와이안 팬케이크 · 아사이볼 · 지호 과일 공유</div>
+    </div>
+    <div class="pin-card">
+      <div class="pin-num">북부 · 플랜 B</div>
+      <div class="pin-name">백년고가 우후야</div>
+      <div class="pin-info">폭포뷰 전통가옥 · 아구 샤브샤브 · 예약 추천</div>
+    </div>
+    <div class="pin-card">
+      <div class="pin-num">북부 · 플랜 B</div>
+      <div class="pin-name">반쇼테이</div>
+      <div class="pin-info">츄라우미 근처 · 다다미방 · 담백한 소바</div>
+    </div>
+    <div class="pin-card" style="background:rgba(255,152,0,0.07);border-color:rgba(255,152,0,0.2)">
+      <div class="pin-num" style="color:var(--accent2)">남부 · 비상용</div>
+      <div class="pin-name">이토만 어시장</div>
+      <div class="pin-info">참치회·초밥 포장 → 숙소 전자레인지 활용</div>
+    </div>
+  </div>
+  <div class="tip-box" style="max-width:1060px;margin-top:12px;font-size:13px">
+    ⚠️ 일본 식당 공통 주의사항: 이동 전 반드시 구글맵으로 <strong>'현재 영업 중'</strong> 확인! 정기 휴일(주로 수·목) & 브레이크 타임(14:30–17:00) 철저
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 15 · CLOSING
+══════════════════════════════════════════ -->
+<section class="slide" id="s15">
+  <div class="bg-img" style="background-image:url('https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=1280&q=80')"></div>
+  <div class="bg-overlay" style="background:linear-gradient(155deg,rgba(0,10,30,0.58),rgba(0,0,0,0.82))"></div>
+  <div class="eyebrow">2025 · Family Memories</div>
+  <h1 class="lg">즐거운 여행 되세요! 🌴</h1>
+  <div class="divider"></div>
+  <p class="sub">지호의 첫 해외여행,<br>오키나와의 에메랄드 바다처럼 아름다운 추억으로 가득 채워지길 바랍니다 🐠</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:4px">
+    <span class="tag">6박 7일</span>
+    <span class="tag">렌터카 여행</span>
+    <span class="tag orange">21개월 지호와 함께</span>
+    <span class="tag">부세나 테라스</span>
+    <span class="tag">츄라우미 수족관</span>
+    <span class="tag orange">4월 15–21일</span>
+  </div>
+</section>
+
+</div><!-- /deck -->
+</div><!-- /deck-wrapper -->
+
+<div id="nav">
+  <button class="nav-btn" id="btn-prev">← 이전</button>
+  <span id="counter">1 / 15</span>
+  <button class="nav-btn" id="btn-next">다음 →</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const counter = document.getElementById('counter');
+  const progressBar = document.getElementById('progress-bar');
+  let current = 0;
+  let animating = false;
+
+  function goTo(n) {
+    if (animating) return;
+    const target = Math.max(0, Math.min(slides.length - 1, n));
+    if (target === current) return;
+    animating = true;
+
+    slides[current].classList.add('exit');
+    slides[current].classList.remove('active');
+
+    const prev = current;
+    current = target;
+    slides[current].classList.add('active');
+    counter.textContent = `${current + 1} / ${slides.length}`;
+    progressBar.style.width = `${((current + 1) / slides.length) * 100}%`;
+
+    setTimeout(() => {
+      slides[prev].classList.remove('exit');
+      animating = false;
+    }, 560);
+  }
+
+  document.getElementById('btn-next').addEventListener('click', () => goTo(current + 1));
+  document.getElementById('btn-prev').addEventListener('click', () => goTo(current - 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1);
+  });
+
+  function scale() {
+    const w = document.getElementById('deck-wrapper');
+    const s = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    w.style.transform = `scale(${s})`;
+  }
+  window.addEventListener('resize', scale);
+  scale();
+  progressBar.style.width = `${(1 / slides.length) * 100}%`;
+</script>
+</body>
+</html>
