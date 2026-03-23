@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=1280">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>오키나와 6박 7일 가족여행 2025</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&display=swap');
@@ -49,8 +49,10 @@
     pointer-events: none;
     background: #0a0a0a;
   }
-  .slide.active { opacity: 1; transform: translateX(0); pointer-events: all; }
-  .slide.exit   { opacity: 0; transform: translateX(-50px); }
+  .slide.active         { opacity: 1; transform: translateX(0);    pointer-events: all; }
+  .slide.exit           { opacity: 0; transform: translateX(-50px); }
+  .slide.exit-reverse   { opacity: 0; transform: translateX(50px);  }
+  .slide.enter-reverse  { transform: translateX(-50px); }
 
   .bg-img {
     position: absolute; inset: 0;
@@ -216,6 +218,107 @@
   .nav-btn { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14); color: rgba(255,255,255,0.55); border-radius: 999px; padding: 7px 18px; cursor: pointer; font-size: 13px; transition: all 0.2s; font-family: inherit; }
   .nav-btn:hover { background: rgba(255,255,255,0.13); color: #fff; }
   #progress-bar { position: fixed; top: 0; left: 0; height: 2px; background: var(--accent); z-index: 300; transition: width 0.4s ease; }
+
+  /* ── Mobile (≤ 768px · iPhone 14 Pro 기준) ── */
+  @media (max-width: 768px) {
+    #deck-wrapper { transform: none !important; }
+
+    #deck {
+      width: 100vw;
+      height: 100dvh;
+    }
+
+    .slide {
+      width: 100vw;
+      height: 100dvh;
+      padding: 44px 18px 86px;
+      justify-content: flex-start;
+      align-items: flex-start;
+      text-align: left;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* 가운데 정렬이 필요한 슬라이드 (타이틀·클로징) */
+    #s1, #s15 {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    h1        { font-size: 28px; letter-spacing: -0.5px; margin-bottom: 10px; }
+    h1.lg     { font-size: 32px; }
+    h1.sm     { font-size: 24px; }
+    h1.xs     { font-size: 20px; }
+    .sub      { font-size: 15px; max-width: 100%; margin-bottom: 16px; }
+    .sub.sm   { font-size: 13px; }
+    .eyebrow  { font-size: 10px; margin-bottom: 8px; }
+    .divider  { margin: 8px auto; }
+    .date-badge { font-size: 12px; }
+
+    /* 카드 그리드 → 2열 */
+    .card-grid          { grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    .card               { padding: 12px 14px; border-radius: 10px; }
+    .card .day-title    { font-size: 13px; }
+    .card .day-desc     { font-size: 11px; }
+
+    /* split → 1열 */
+    .split { grid-template-columns: 1fr; gap: 10px; }
+
+    /* 타임라인 */
+    .timeline     { max-width: 100%; gap: 6px; }
+    .tl-row       { padding: 9px 12px; }
+    .tl-title     { font-size: 13px; }
+    .tl-desc      { font-size: 11px; }
+    .tl-time      { font-size: 11px; min-width: 38px; }
+    .map-badge    { font-size: 9px; padding: 2px 6px; }
+
+    /* 맵 슬라이드 → 상하 분할 */
+    .map-slide-layout {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 240px;
+      position: absolute;
+      inset: 0;
+    }
+    .map-left           { padding: 20px 18px 14px; overflow-y: auto; }
+    .route-step         { padding: 8px 12px; }
+    .route-step .rs-name { font-size: 13px; }
+    .route-step .rs-sub  { font-size: 10px; }
+
+    /* 포토 스트립 → 가로 스크롤 */
+    .photo-strip { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+    .photo-strip .ps-item { flex: 0 0 120px; }
+    .photo-strip .ps-item img { height: 110px; }
+
+    /* 핀 그리드 → 2열 */
+    .pin-grid { grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    .pin-card { padding: 10px 12px; border-radius: 10px; }
+    .pin-card .pin-name { font-size: 13px; }
+    .pin-card .pin-info { font-size: 10px; }
+
+    /* 통계 */
+    .stat       { font-size: 36px; }
+    .stat-label { font-size: 13px; }
+
+    /* 포인트 리스트 */
+    ul.points li      { font-size: 14px; padding: 10px 14px; }
+    ul.points         { max-width: 100%; }
+
+    /* 팁 박스 */
+    .tip-box { font-size: 12px; padding: 10px 14px; max-width: 100%; }
+
+    /* 이미지 카드 */
+    .img-card[style*="height:200px"] { height: 150px !important; }
+
+    /* 태그 */
+    .tags { gap: 5px; margin-top: 8px; }
+    .tag  { font-size: 11px; padding: 4px 10px; }
+
+    /* 네비게이션 */
+    #nav      { bottom: 12px; gap: 8px; }
+    .nav-btn  { padding: 10px 22px; font-size: 14px; touch-action: manipulation; border-radius: 999px; }
+    #counter  { font-size: 11px; min-width: 38px; }
+  }
 
   @media print {
     body { background: #0a0a0a; overflow: visible; }
@@ -915,35 +1018,56 @@
   let current = 0;
   let animating = false;
 
-  function goTo(n) {
+  function goTo(n, direction) {
     if (animating) return;
     const target = Math.max(0, Math.min(slides.length - 1, n));
     if (target === current) return;
     animating = true;
 
-    slides[current].classList.add('exit');
+    const forward = direction !== undefined ? direction : (target > current);
+    const exitClass  = forward ? 'exit' : 'exit-reverse';
+
+    slides[current].classList.add(exitClass);
     slides[current].classList.remove('active');
 
     const prev = current;
     current = target;
-    slides[current].classList.add('active');
+
+    // 진입 방향 초기 위치 설정
+    if (!forward) {
+      slides[current].style.transform = 'translateX(-50px)';
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          slides[current].style.transform = '';
+          slides[current].classList.add('active');
+        });
+      });
+    } else {
+      slides[current].classList.add('active');
+    }
+
     counter.textContent = `${current + 1} / ${slides.length}`;
     progressBar.style.width = `${((current + 1) / slides.length) * 100}%`;
 
     setTimeout(() => {
-      slides[prev].classList.remove('exit');
+      slides[prev].classList.remove(exitClass);
+      slides[prev].style.transform = '';
       animating = false;
     }, 560);
   }
 
-  document.getElementById('btn-next').addEventListener('click', () => goTo(current + 1));
-  document.getElementById('btn-prev').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('btn-next').addEventListener('click', () => goTo(current + 1, true));
+  document.getElementById('btn-prev').addEventListener('click', () => goTo(current - 1, false));
   document.addEventListener('keydown', e => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
-    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1);
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1, true);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1, false);
   });
 
   function scale() {
+    if (window.innerWidth <= 768) {
+      document.getElementById('deck-wrapper').style.transform = '';
+      return;
+    }
     const w = document.getElementById('deck-wrapper');
     const s = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
     w.style.transform = `scale(${s})`;
@@ -951,6 +1075,29 @@
   window.addEventListener('resize', scale);
   scale();
   progressBar.style.width = `${(1 / slides.length) * 100}%`;
+
+  // ── 터치 스와이프 (좌우 슬라이드 전환) ──
+  (function() {
+    const deck = document.getElementById('deck');
+    let txStart = 0, tyStart = 0, tStart = 0;
+
+    deck.addEventListener('touchstart', function(e) {
+      txStart = e.touches[0].clientX;
+      tyStart = e.touches[0].clientY;
+      tStart  = Date.now();
+    }, { passive: true });
+
+    deck.addEventListener('touchend', function(e) {
+      const dx = e.changedTouches[0].clientX - txStart;
+      const dy = e.changedTouches[0].clientY - tyStart;
+      const dt = Date.now() - tStart;
+      // 수평 스와이프 판별: 400ms 이내, 45px 이상, 세로 이동보다 수평이 1.5배 이상
+      if (dt < 400 && Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        if (dx < 0) goTo(current + 1, true);  // 왼쪽으로 → 다음 슬라이드
+        else        goTo(current - 1, false); // 오른쪽으로 → 이전 슬라이드
+      }
+    }, { passive: true });
+  })();
 </script>
 </body>
 </html>
